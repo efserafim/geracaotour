@@ -1,4 +1,4 @@
-import { SITE_CONFIG, API_BASE } from "./config.js?v=8";
+import { SITE_CONFIG, API_BASE } from "./config.js?v=9";
 
 const TOKEN_KEY = "geracao-tour-token";
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -367,16 +367,20 @@ function authorizationMarkup(p) {
   return `${letterhead("Autorização de menor", SITE_CONFIG.tourName)}
   <p>Eu, ${fill(p.guardian_name)}, documento ${fill(p.guardian_document)}, telefone ${fill(p.guardian_phone)}, responsável legal, <b>autorizo</b> ${fill(p.full_name)}, nascido(a) em ${fill(born)}, a participar da Peregrinação Jovem em <b>${escapeHtml(SITE_CONFIG.tourDate)}</b>.</p>
   <h2>Roteiro e pagamento</h2>
-  <div class="details"><p><b>06h00</b> Concentração — ${escapeHtml(SITE_CONFIG.meetingPoint)}<br><b>06h30</b> Saída do ônibus<br><b>Valor</b> R$ 30,00 via PIX para ${escapeHtml(SITE_CONFIG.pixLabel)}, ${escapeHtml(SITE_CONFIG.pixName)}<br><b>A vaga só é confirmada depois do pagamento.</b></p><ol>${stops}</ol></div>
+  <div class="details"><p><b>06h00</b> Concentração — ${escapeHtml(SITE_CONFIG.meetingPoint)}<br><b>06h30</b> Saída do ônibus<br><b>Valor</b> R$ 30,00 via PIX para ${escapeHtml(SITE_CONFIG.pixLabel)}, ${escapeHtml(SITE_CONFIG.pixName)}<br><b>Envie o comprovante no WhatsApp de ${escapeHtml(SITE_CONFIG.pixName)}: ${escapeHtml(SITE_CONFIG.pixLabel)}.</b><br><b>A vaga só é confirmada depois do pagamento. A autorização assinada deve ser entregue no dia do passeio.</b></p><ol>${stops}</ol></div>
   <h2>Declaração</h2>
   <p>Conheço o roteiro, os horários e o valor. Autorizo a ida do menor, confirmo que os dados são verdadeiros e permaneço disponível em caso de emergência.</p>
   <p>Local e data: <span class="blank"></span>, ____/____/________.</p>
   <div class="signature"><div>Assinatura do(a) responsável<br><span>${escapeHtml(p.guardian_name || "")}</span></div><div>Telefone<br><span>${escapeHtml(p.guardian_phone || "")}</span></div></div>
-  <p class="small">Entregar este documento assinado à coordenação antes do embarque.</p>
+  <p class="small">Entregar este documento assinado à coordenação <b>no dia do passeio</b>, na concentração (6h). Comprovante do PIX: WhatsApp de ${escapeHtml(SITE_CONFIG.pixName)}, ${escapeHtml(SITE_CONFIG.pixLabel)}.</p>
   ${printFoot()}`;
 }
 const downloadAuthorization = person => printShell("Autorização — Peregrinação Jovem", "", authorizationMarkup(person));
 $("#blank-authorization").addEventListener("click", () => downloadAuthorization({}));
+
+const pixWhatsapp = SITE_CONFIG.pixWhatsapp || `55${SITE_CONFIG.pixKey}`;
+const receiptText = encodeURIComponent(`Olá, Welerson! Segue o comprovante do PIX de R$ 30 da Peregrinação Jovem.`);
+$("#send-receipt")?.setAttribute("href", `https://wa.me/${pixWhatsapp}?text=${receiptText}`);
 
 /* ---------- Envio da inscrição ---------- */
 signupForm.addEventListener("submit", async event => {
@@ -405,6 +409,8 @@ signupForm.addEventListener("submit", async event => {
     if (minor) {
       $("#authorization-button").hidden = false;
       $("#authorization-button").onclick = () => downloadAuthorization(participant);
+      const authNote = $("#success-auth-note");
+      if (authNote) authNote.hidden = false;
     }
     await loadCapacity();
     $("#success-panel").scrollIntoView({ behavior: "smooth", block: "center" });

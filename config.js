@@ -22,9 +22,11 @@ export const SITE_CONFIG = {
   pixKey: "22998750491",
   pixLabel: "(22) 99875-0491",
   pixName: "Welerson",
+  // WhatsApp do Welerson para envio do comprovante do PIX (mesmo número da chave).
+  pixWhatsapp: "5522998750491",
 
   info: {
-    price: "R$ 30 no PIX (22) 99875-0491, Welerson. A ficha reserva. O pagamento confirma.",
+    price: "R$ 30 no PIX (22) 99875-0491, Welerson. Envie o comprovante no WhatsApp dele. A ficha reserva; o pagamento confirma.",
     returnTime: "",
     deadline: "",
     bring: [

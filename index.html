@@ -262,7 +262,7 @@
       <div class="faq-list">
         <details class="reveal">
           <summary>Quem pode ir?</summary>
-          <p>Qualquer idade. Menor de 18 entra com os dados do responsável na ficha e a autorização assinada, entregue antes de embarcar.</p>
+          <p>Qualquer idade. Menor de 18 entra com os dados do responsável na ficha e a autorização assinada, entregue à coordenação no dia do passeio, na concentração.</p>
         </details>
         <details class="reveal">
           <summary>Até quando dá para se inscrever?</summary>
@@ -270,11 +270,11 @@
         </details>
         <details class="reveal">
           <summary>Preciso de documento?</summary>
-          <p>Sim. Leve um documento com foto no dia. Na ficha, o CPF ou o RG entra na lista de passageiros.</p>
+          <p>Sim. Leve um documento com foto no dia. Na ficha, o CPF ou o RG entra na lista de passageiros. Menor de 18: leve também a autorização assinada para entregar na concentração.</p>
         </details>
         <details class="reveal">
           <summary>Quando a vaga está confirmada?</summary>
-          <p>Quando o PIX cai. Mande R$ 30 para (22) 99875-0491, Welerson, e o comprovante no WhatsApp. Sem o pagamento, o lugar continua em aberto.</p>
+          <p>Quando o PIX cai. Mande R$ 30 para (22) 99875-0491, Welerson, e o comprovante no WhatsApp dele: (22) 99875-0491. Sem o pagamento, o lugar continua em aberto.</p>
         </details>
         <details class="reveal">
           <summary>E se eu precisar desistir?</summary>
@@ -298,8 +298,8 @@
         <p id="seats-lead">A ficha reserva o seu lugar. O PIX de R$ 30 confirma.</p>
         <ul class="checks">
           <li>A vaga fecha com o PIX de R$ 30</li>
-          <li>Seus dados ficam só com a coordenação</li>
-          <li>Menor de 18: responsável e autorização</li>
+          <li>Comprovante no WhatsApp de Welerson: (22) 99875-0491</li>
+          <li>Menor de 18: autorização assinada no dia do passeio</li>
         </ul>
         <div class="share-row">
           <span>Chama alguém para ir junto:</span>
@@ -340,11 +340,12 @@
         <div class="success-panel" id="success-panel" hidden role="status">
           <span class="success-check"><svg><use href="#i-cross"/></svg></span>
           <h3>Ficha recebida. Falta o PIX.</h3>
-          <p>Mande <b>R$ 30</b> para <b>(22) 99875-0491</b>, Welerson, e o comprovante no WhatsApp. Aí o lugar é seu.</p>
+          <p>Mande <b>R$ 30</b> no PIX para <b>(22) 99875-0491</b>, Welerson. Depois envie o comprovante no WhatsApp dele: <b>(22) 99875-0491</b>. Aí o lugar é seu.</p>
+          <p id="success-auth-note" hidden>Se for menor de 18 anos: baixe a autorização, peça a assinatura do responsável e <b>entregue no dia do passeio</b>, na concentração das 6h.</p>
           <div class="success-actions">
             <button class="btn btn-gold" type="button" id="copy-pix-success">Copiar chave PIX</button>
             <button class="btn btn-gold" id="authorization-button" type="button" hidden>Baixar autorização <span aria-hidden="true">↓</span></button>
-            <a class="btn btn-ghost" href="https://wa.me/5522997812588" target="_blank" rel="noreferrer"><svg aria-hidden="true"><use href="#i-whatsapp"/></svg> Enviar comprovante</a>
+            <a class="btn btn-ghost" id="send-receipt" href="https://wa.me/5522998750491" target="_blank" rel="noreferrer"><svg aria-hidden="true"><use href="#i-whatsapp"/></svg> Enviar comprovante ao Welerson</a>
             <button class="btn btn-ghost" type="button" id="share-after"><svg aria-hidden="true"><use href="#i-share"/></svg> Chamar um amigo</button>
           </div>
         </div>
@@ -533,6 +534,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=15"></script>
+  <script type="module" src="./app.js?v=16"></script>
 </body>
 </html>
