@@ -26,6 +26,21 @@ export async function handler(event) {
     const method = event.httpMethod;
     const parts = path.split("/").filter(Boolean);
 
+    if (method === "GET" && parts[0] === "health" && parts.length === 1) {
+      return ok({
+        ok: true,
+        databaseUrl: Boolean(process.env.DATABASE_URL),
+        authSecret: Boolean(process.env.AUTH_SECRET && process.env.AUTH_SECRET.length >= 16),
+        coordinators: (() => {
+          try {
+            const list = JSON.parse(process.env.COORDINATORS || "[]");
+            return Array.isArray(list) && list.length > 0;
+          } catch {
+            return false;
+          }
+        })()
+      });
+    }
     if (method === "GET" && parts[0] === "capacity" && parts.length === 1) {
       return await capacity();
     }
