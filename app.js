@@ -517,16 +517,16 @@ function renderDashboard() {
     const paid = isPaid(p);
     const auth = minor ? `<button class="status-pill ${done ? "status-done" : "status-pending"}" data-action="authorization" data-id="${p.id}">${done ? "Entregue" : "Pendente"}</button><button class="table-icon" title="Reemitir autorização" aria-label="Reemitir autorização de ${escapeHtml(p.full_name)}" data-action="reissue" data-id="${p.id}">⤓</button>` : '<span class="muted">—</span>';
     return `<tr class="${paid ? "row-paid" : "row-unpaid"}">
-      <td><b>${escapeHtml(p.full_name)}</b>${minor ? ' <span class="minor-tag">menor</span>' : ""}<small>${ageAt(p.birth_date)} anos · ${escapeHtml(formatBirth(p.birth_date))} · ${escapeHtml(p.document_number)}</small><small>${escapeHtml(p.dietary_notes || p.observations ? `Obs.: ${p.dietary_notes || "—"} · ${p.observations || "—"}` : "")}</small></td>
-      <td><button class="status-pill ${paid ? "status-done" : "status-pending"}" data-action="payment" data-id="${p.id}">${paid ? "Pago" : "Aguardando"}</button></td>
-      <td>${escapeHtml(p.phone)}<small>${escapeHtml(p.email)}</small></td>
-      <td>${escapeHtml(p.emergency_name)}<small>${escapeHtml(p.emergency_phone)}</small></td>
-      <td>${escapeHtml(p.guardian_name || "—")}<small>${escapeHtml(p.guardian_phone || "")}</small></td>
-      <td>${auth}</td>
-      <td><label class="checkin"><input type="checkbox" data-action="attendance" data-id="${p.id}" ${p.attended ? "checked" : ""}><span>${p.attended ? "Presente" : "Check-in"}</span></label></td>
-      <td><button class="table-icon" title="Editar" aria-label="Editar ${escapeHtml(p.full_name)}" data-action="edit" data-id="${p.id}">✎</button><button class="table-icon danger-icon" title="Remover" aria-label="Remover ${escapeHtml(p.full_name)}" data-action="remove" data-id="${p.id}">×</button></td>
+      <td class="dash-cell-name" data-label="Participante"><b>${escapeHtml(p.full_name)}</b>${minor ? ' <span class="minor-tag">menor</span>' : ""}<small>${ageAt(p.birth_date)} anos · ${escapeHtml(formatBirth(p.birth_date))} · ${escapeHtml(p.document_number)}</small><small>${escapeHtml(p.dietary_notes || p.observations ? `Obs.: ${p.dietary_notes || "—"} · ${p.observations || "—"}` : "")}</small></td>
+      <td data-label="PIX"><button class="status-pill ${paid ? "status-done" : "status-pending"}" data-action="payment" data-id="${p.id}">${paid ? "Pago" : "Aguardando"}</button></td>
+      <td data-label="Contato"><span class="dash-cell-stack">${escapeHtml(p.phone)}<small>${escapeHtml(p.email)}</small></span></td>
+      <td data-label="Emergência"><span class="dash-cell-stack">${escapeHtml(p.emergency_name)}<small>${escapeHtml(p.emergency_phone)}</small></span></td>
+      <td data-label="Responsável"><span class="dash-cell-stack">${escapeHtml(p.guardian_name || "—")}<small>${escapeHtml(p.guardian_phone || "")}</small></span></td>
+      <td data-label="Autorização" class="dash-cell-actions">${auth}</td>
+      <td data-label="Presença"><label class="checkin"><input type="checkbox" data-action="attendance" data-id="${p.id}" ${p.attended ? "checked" : ""}><span>${p.attended ? "Presente" : "Check-in"}</span></label></td>
+      <td data-label="Ações" class="dash-cell-actions"><button class="table-icon" title="Editar" aria-label="Editar ${escapeHtml(p.full_name)}" data-action="edit" data-id="${p.id}">✎</button><button class="table-icon danger-icon" title="Remover" aria-label="Remover ${escapeHtml(p.full_name)}" data-action="remove" data-id="${p.id}">×</button></td>
     </tr>`;
-  }).join("") : `<tr><td colspan="8" class="empty-table">${registrations.length ? "Nenhuma ficha neste filtro." : "Nenhuma ficha ainda."}</td></tr>`;
+  }).join("") : `<tr class="dash-empty-row"><td colspan="8" class="empty-table">${registrations.length ? "Nenhuma ficha neste filtro." : "Nenhuma ficha ainda."}</td></tr>`;
 }
 const rerender = debounce(renderDashboard, 120);
 $("#search-input").addEventListener("input", rerender);

@@ -63,7 +63,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap"></noscript>
   <link rel="preload" as="image" href="./image/guido-schaffer-696x392.jpeg" fetchpriority="high">
-  <link rel="stylesheet" href="./styles.css?v=7">
+  <link rel="stylesheet" href="./styles.css?v=8">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -449,18 +449,18 @@
 
   <dialog id="dashboard-dialog" class="dashboard-modal">
     <div class="dash-head">
-      <div>
+      <div class="dash-title">
         <p class="eyebrow">PEREGRINAÇÃO JOVEM · COORDENAÇÃO</p>
         <h2>Inscrições</h2>
         <p class="dash-sub">Vaga confirmada somente com PIX pago.</p>
       </div>
+      <button class="modal-close" id="dashboard-close" aria-label="Fechar">×</button>
       <div class="dash-actions">
         <button class="btn btn-ghost sm" id="refresh-list" type="button">Atualizar</button>
-        <button class="btn btn-ghost sm" id="export-csv">CSV / Excel</button>
+        <button class="btn btn-ghost sm" id="export-csv">CSV</button>
         <button class="btn btn-ghost sm" id="export-pdf">Lista PDF</button>
-        <button class="btn btn-ghost sm" id="print-list">Presença PDF</button>
+        <button class="btn btn-ghost sm" id="print-list">Presença</button>
         <button class="btn btn-ghost sm" id="logout-button">Sair</button>
-        <button class="modal-close" id="dashboard-close" aria-label="Fechar">×</button>
       </div>
     </div>
     <div class="stats">
@@ -539,6 +539,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=16"></script>
+  <script type="module" src="./app.js?v=17"></script>
 </body>
 </html>
