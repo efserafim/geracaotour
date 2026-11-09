@@ -30,7 +30,12 @@ export function options() {
 
 export function getSql() {
   const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL missing");
+  if (!url) {
+    const error = new Error("DATABASE_URL missing");
+    error.status = 503;
+    error.code = "DATABASE_URL_MISSING";
+    throw error;
+  }
   return neon(url, { fullResults: false });
 }
 

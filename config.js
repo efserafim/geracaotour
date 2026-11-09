@@ -16,7 +16,7 @@ export const SITE_CONFIG = {
     "Igreja Nossa Senhora da Paz, Rua Visconde de Pirajá, 339, Ipanema"
   ],
 
-  siteUrl: "https://geracao-tour.netlify.app/",
+  siteUrl: "https://geracaotour.netlify.app/",
   shareText: "Sábado 05/12 tem Peregrinação Jovem da Geração Eucarística. De Bacaxá ao Rio, R$ 30. Bora?",
   coordinatorWhatsapp: "5522997812588",
   pixKey: "22998750491",

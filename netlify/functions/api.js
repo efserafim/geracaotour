@@ -53,6 +53,12 @@ export async function handler(event) {
     if (error.message === "INVALID_JSON") {
       return json(400, { error: "INVALID_JSON" });
     }
+    if (error.code === "DATABASE_URL_MISSING" || error.message === "DATABASE_URL missing") {
+      return json(503, {
+        error: "DATABASE_URL_MISSING",
+        message: "Configure DATABASE_URL nas Environment variables do Netlify."
+      });
+    }
     console.error(error);
     return json(500, { error: "SERVER_ERROR", message: String(error.message || error) });
   }

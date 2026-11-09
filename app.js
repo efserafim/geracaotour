@@ -1,4 +1,4 @@
-import { SITE_CONFIG, API_BASE } from "./config.js?v=7";
+import { SITE_CONFIG, API_BASE } from "./config.js?v=8";
 
 const TOKEN_KEY = "geracao-tour-token";
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -170,7 +170,9 @@ async function loadCapacity() {
     setCapacity(data?.registered ?? 0, data?.capacity);
   } catch (error) {
     console.error("Falha ao carregar vagas:", error);
-    $("#form-error").textContent = "Não foi possível verificar as vagas. Atualize a página para tentar novamente.";
+    $("#form-error").textContent = error.code === "DATABASE_URL_MISSING"
+      ? "Banco ainda não configurado no Netlify (DATABASE_URL)."
+      : "Não foi possível verificar as vagas. Atualize a página para tentar novamente.";
     signupForm.querySelector('[type="submit"]').disabled = true;
   }
   getLogoSrc();
