@@ -45,20 +45,60 @@ function getSecret() {
   return secret;
 }
 
-function getCoordinators() {
-  const raw = process.env.COORDINATORS || "[]";
-  try {
-    const list = JSON.parse(raw);
-    if (!Array.isArray(list)) return [];
-    return list
-      .map(item => ({
-        email: String(item.email || "").trim().toLowerCase(),
-        password: String(item.password || "")
-      }))
-      .filter(item => item.email && item.password);
-  } catch {
-    return [];
+function normalizeCoordinator(item) {
+  if (!item || typeof item !== "object") return null;
+  const email = String(item.email || item.Email || "").trim().toLowerCase();
+  const password = String(item.password || item.senha || item.Password || "");
+  if (!email || !password) return null;
+  return { email, password };
+}
+
+export function getCoordinators() {
+  const list = [];
+
+  // Formato simples (recomendado no Netlify): COORDINATOR_EMAIL + COORDINATOR_PASSWORD
+  const simpleEmail = String(process.env.COORDINATOR_EMAIL || "").trim().toLowerCase();
+  const simplePassword = String(process.env.COORDINATOR_PASSWORD || "");
+  if (simpleEmail && simplePassword) {
+    list.push({ email: simpleEmail, password: simplePassword });
   }
+
+  // Formato JSON: COORDINATORS=[{"email":"...","password":"..."}]
+  let raw = String(process.env.COORDINATORS || "").trim();
+  if (raw) {
+    if (
+      (raw.startsWith("'") && raw.endsWith("'")) ||
+      (raw.startsWith('"') && raw.endsWith('"'))
+    ) {
+      raw = raw.slice(1, -1);
+    }
+    try {
+      let parsed = JSON.parse(raw);
+      if (typeof parsed === "string") parsed = JSON.parse(parsed);
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      for (const item of items) {
+        const normalized = normalizeCoordinator(item);
+        if (normalized) list.push(normalized);
+      }
+    } catch {
+      // aceita também email:senha ou email|senha
+      const match = raw.match(/^([^:|\s]+)[:|](.+)$/);
+      if (match) {
+        list.push({
+          email: match[1].trim().toLowerCase(),
+          password: match[2]
+        });
+      }
+    }
+  }
+
+  // remove duplicados por e-mail (mantém o primeiro)
+  const seen = new Set();
+  return list.filter(item => {
+    if (seen.has(item.email)) return false;
+    seen.add(item.email);
+    return true;
+  });
 }
 
 function b64url(input) {

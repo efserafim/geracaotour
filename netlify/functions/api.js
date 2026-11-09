@@ -1,6 +1,7 @@
 import {
   apiPath,
   authenticateCoordinator,
+  getCoordinators,
   getSql,
   json,
   ok,
@@ -31,14 +32,8 @@ export async function handler(event) {
         ok: true,
         databaseUrl: Boolean(process.env.DATABASE_URL),
         authSecret: Boolean(process.env.AUTH_SECRET && process.env.AUTH_SECRET.length >= 16),
-        coordinators: (() => {
-          try {
-            const list = JSON.parse(process.env.COORDINATORS || "[]");
-            return Array.isArray(list) && list.length > 0;
-          } catch {
-            return false;
-          }
-        })()
+        coordinators: getCoordinators().length > 0,
+        coordinatorAccounts: getCoordinators().length
       });
     }
     if (method === "GET" && parts[0] === "capacity" && parts.length === 1) {
@@ -105,7 +100,13 @@ async function register(event) {
 async function login(event) {
   const { email, password } = parseBody(event);
   if (!authenticateCoordinator(email, password)) {
-    return json(401, { error: "INVALID_CREDENTIALS" });
+    const hasCoordinators = getCoordinators().length > 0;
+    return json(401, {
+      error: "INVALID_CREDENTIALS",
+      hint: hasCoordinators
+        ? "E-mail ou senha não conferem."
+        : "Configure COORDINATOR_EMAIL e COORDINATOR_PASSWORD no Netlify e faça redeploy."
+    });
   }
   const token = signToken({ email: String(email).trim().toLowerCase() });
   return ok({ token, email: String(email).trim().toLowerCase() });
