@@ -85,15 +85,23 @@ async function register(event) {
   const participant = body.participant || body;
   const sql = getSql();
   try {
-    const rows = await sql`select public.register_participant(${JSON.stringify(participant)}::jsonb) as data`;
-    return ok(rows[0]?.data || { ok: true });
+    // Neon serializa objetos JS como JSON; CAST garante jsonb na função SQL.
+    const rows = await sql`
+      select public.register_participant(cast(${JSON.stringify(participant)} as jsonb)) as data
+    `;
+    const data = rows[0]?.data;
+    return ok(typeof data === "string" ? JSON.parse(data) : (data || { ok: true }));
   } catch (error) {
+    console.error("register_participant failed:", error);
     const code = sqlErrorCode(error);
     const status = code === "CAPACITY_REACHED" ? 409
       : code === "DUPLICATE_REGISTRATION" ? 409
       : code === "INVALID_PARTICIPANT" ? 400
       : 500;
-    return json(status, { error: code });
+    return json(status, {
+      error: code,
+      message: code === "SERVER_ERROR" ? String(error?.message || error) : undefined
+    });
   }
 }
 
