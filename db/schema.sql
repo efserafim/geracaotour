@@ -36,8 +36,9 @@ create table if not exists public.registrations (
   paid_at timestamptz,
   attended boolean not null default false,
   created_at timestamptz not null default now(),
+  -- Adultos (18+) passam sem responsável. Menores precisam de responsável completo.
   constraint guardian_required_for_minor check (
-    birth_date > (current_date - interval '18 years') or
+    birth_date <= (current_date - interval '18 years') or
     (nullif(trim(guardian_name), '') is not null and nullif(trim(guardian_phone), '') is not null
       and nullif(trim(guardian_document), '') is not null and guardian_consent)
   )

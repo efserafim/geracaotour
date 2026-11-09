@@ -191,5 +191,6 @@ export function sqlErrorCode(error) {
   if (message.includes("CAPACITY_REACHED")) return "CAPACITY_REACHED";
   if (message.includes("DUPLICATE_REGISTRATION") || error?.code === "23505") return "DUPLICATE_REGISTRATION";
   if (message.includes("INVALID_PARTICIPANT")) return "INVALID_PARTICIPANT";
+  if (message.includes("guardian_required_for_minor")) return "INVALID_PARTICIPANT";
   return "SERVER_ERROR";
 }
