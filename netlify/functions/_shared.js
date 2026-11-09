@@ -39,6 +39,32 @@ export function getSql() {
   return neon(url, { fullResults: false });
 }
 
+let schemaReady = false;
+export function resetSchemaFlag() { schemaReady = false; }
+export async function ensureSchema(sql = getSql()) {
+  if (schemaReady) return;
+  // Corrige constraint invertida que bloqueava inscrição de adultos.
+  await sql`alter table public.registrations drop constraint if exists guardian_required_for_minor`;
+  try {
+    await sql`
+      alter table public.registrations
+      add constraint guardian_required_for_minor check (
+        birth_date <= (current_date - interval '18 years')
+        or (
+          nullif(trim(guardian_name), '') is not null
+          and nullif(trim(guardian_phone), '') is not null
+          and nullif(trim(guardian_document), '') is not null
+          and guardian_consent
+        )
+      )
+    `;
+  } catch (error) {
+    const message = String(error?.message || error);
+    if (!message.includes("already exists")) throw error;
+  }
+  schemaReady = true;
+}
+
 function getSecret() {
   const secret = process.env.AUTH_SECRET;
   if (!secret || secret.length < 16) throw new Error("AUTH_SECRET missing");

@@ -1,6 +1,7 @@
 import {
   apiPath,
   authenticateCoordinator,
+  ensureSchema,
   getCoordinators,
   getSql,
   json,
@@ -8,6 +9,7 @@ import {
   options,
   parseBody,
   requireAuth,
+  resetSchemaFlag,
   signToken,
   sqlErrorCode
 } from "./_shared.js";
@@ -76,8 +78,10 @@ export async function handler(event) {
 
 async function capacity() {
   const sql = getSql();
+  try { await ensureSchema(sql); } catch (error) { console.error("ensureSchema:", error); }
   const rows = await sql`select public.public_capacity() as data`;
-  return ok(rows[0]?.data || { registered: 0, paid: 0, capacity: 33 });
+  const data = rows[0]?.data;
+  return ok(typeof data === "string" ? JSON.parse(data) : (data || { registered: 0, paid: 0, capacity: 33 }));
 }
 
 async function register(event) {
@@ -85,6 +89,7 @@ async function register(event) {
   const participant = body.participant || body;
   const sql = getSql();
   try {
+    await ensureSchema(sql);
     // Neon serializa objetos JS como JSON; CAST garante jsonb na função SQL.
     const rows = await sql`
       select public.register_participant(cast(${JSON.stringify(participant)} as jsonb)) as data
@@ -93,6 +98,20 @@ async function register(event) {
     return ok(typeof data === "string" ? JSON.parse(data) : (data || { ok: true }));
   } catch (error) {
     console.error("register_participant failed:", error);
+    // Se a constraint antiga ainda atrapalhou, tenta corrigir e repetir uma vez.
+    if (String(error?.message || "").includes("guardian_required_for_minor")) {
+      try {
+        resetSchemaFlag();
+        await ensureSchema(sql);
+        const rows = await sql`
+          select public.register_participant(cast(${JSON.stringify(participant)} as jsonb)) as data
+        `;
+        const data = rows[0]?.data;
+        return ok(typeof data === "string" ? JSON.parse(data) : (data || { ok: true }));
+      } catch (retryError) {
+        error = retryError;
+      }
+    }
     const code = sqlErrorCode(error);
     const status = code === "CAPACITY_REACHED" ? 409
       : code === "DUPLICATE_REGISTRATION" ? 409
