@@ -155,7 +155,9 @@ function setCapacity(count, capacity = tourCapacity) {
     ? "As vagas desta saída acabaram."
     : "A ficha reserva o seu lugar. O PIX de R$ 30 confirma.";
   $("#closed-banner").hidden = !full;
-  signupForm.hidden = full;
+  // Keep the form hidden after a successful signup (success panel is showing).
+  const successShown = !$("#success-panel").hidden;
+  signupForm.hidden = full || successShown;
   const mobileText = $("#mobile-cta-text");
   const mobileLink = $("#mobile-cta-link");
   if (mobileText) mobileText.innerHTML = full ? "<b>Vagas encerradas</b>" : "<b>05/12</b> · R$ 30";
