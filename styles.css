@@ -1,6 +1,11 @@
 :root{--paper:#eef3f8;--paper-2:#e4ecf6;--ink:#163a9c;--ink-2:#0f2c7a;--royal:#1E4FD8;--sky:#4d7ef0;--gold:#1E4FD8;--gold-2:#163a9c;--night:#0A1A4A;--night-2:#071238;--text:#1a2d63;--muted:#4d6494;--glass:rgba(255,255,255,.72);--glass-line:rgba(22,58,156,.16);--serif:"Libre Baskerville",Georgia,serif;--display:"Ultra",Georgia,serif;--sans:"Sora",system-ui,sans-serif}
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;scroll-padding-top:80px}
+html{scroll-behavior:smooth;scroll-padding-top:80px;scrollbar-width:thin;scrollbar-color:#1E4FD8 #d9e4f4}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:#d9e4f4;border-left:1px solid rgba(22,58,156,.12)}
+::-webkit-scrollbar-thumb{background:linear-gradient(180deg,#4d7ef0,#1E4FD8);border-radius:999px;border:2px solid #d9e4f4}
+::-webkit-scrollbar-thumb:hover{background:linear-gradient(180deg,#1E4FD8,#0f2c7a)}
+::-webkit-scrollbar-corner{background:#d9e4f4}
 body{margin:0;font-family:var(--sans);color:var(--text);background:var(--paper);line-height:1.6;overflow-x:hidden;background-image:radial-gradient(circle,rgba(30,79,216,.16) 1.2px,transparent 1.6px);background-size:18px 18px}
 svg{display:inline-block;width:1em;height:1em;flex:none;overflow:visible}
 .t-icon svg{width:1.15em;height:1.15em}
