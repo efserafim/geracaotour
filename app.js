@@ -433,7 +433,7 @@ signupForm.addEventListener("submit", async event => {
     guardian_phone: minor ? v.guardian_phone.trim() : null,
     guardian_document: minor ? v.guardian_document.trim() : null,
     guardian_consent: minor && v.guardian_consent === "on",
-    dietary_notes: v.dietary_notes.trim() || null, observations: v.observations.trim() || null, consent: true
+    dietary_notes: (v.dietary_notes || "").trim() || null, observations: null, consent: true
   };
   const submit = signupForm.querySelector('[type="submit"]');
   const label = $(".submit-label", submit);
