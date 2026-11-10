@@ -2,7 +2,9 @@
 *{box-sizing:border-box}
 html{scroll-behavior:smooth;scroll-padding-top:80px}
 body{margin:0;font-family:var(--sans);color:var(--text);background:var(--paper);line-height:1.6;overflow-x:hidden;background-image:radial-gradient(circle,rgba(30,79,216,.16) 1.2px,transparent 1.6px);background-size:18px 18px}
-svg{display:inline-block;width:1em;height:1em;flex:none}
+svg{display:inline-block;width:1em;height:1em;flex:none;overflow:visible}
+.t-icon svg{width:1.15em;height:1.15em}
+.eyebrow svg{width:.95em;height:.95em;vertical-align:-.12em;margin-right:.15em}
 a{color:inherit}
 button,input,textarea,select{font:inherit}
 h1,h2,h3,p{margin:0}
