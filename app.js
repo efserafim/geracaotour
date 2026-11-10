@@ -113,15 +113,138 @@ const observer = new IntersectionObserver(entries => entries.forEach(e => {
 }), { threshold: .12 });
 $$(".reveal").forEach(el => observer.observe(el));
 
+const journey = $("#journey");
 const bus = $("#bus");
+const busHint = $("#bus-hint");
+const fireworksCanvas = $("#fireworks");
+let busProgress = 0.02;
+let busDragging = false;
+let busArrived = false;
+let dragOriginX = 0;
+let dragOriginProgress = 0;
+let fireworksRaf = 0;
+
+function setBusProgress(value) {
+  busProgress = Math.min(1, Math.max(0, value));
+  bus.style.setProperty("--bus", busProgress.toFixed(4));
+  if (!busArrived && busProgress >= 0.92) arriveInRio();
+}
+function progressFromClientX(clientX) {
+  const rect = journey.getBoundingClientRect();
+  const busW = bus.offsetWidth || 150;
+  const travel = Math.max(rect.width - busW, 1);
+  return (clientX - rect.left - busW / 2) / travel;
+}
+function onBusPointerDown(event) {
+  if (busArrived || event.button > 0) return;
+  busDragging = true;
+  journey.classList.add("is-dragging");
+  dragOriginX = event.clientX;
+  dragOriginProgress = busProgress;
+  bus.setPointerCapture(event.pointerId);
+  event.preventDefault();
+}
+function onBusPointerMove(event) {
+  if (!busDragging) return;
+  const rect = journey.getBoundingClientRect();
+  const busW = bus.offsetWidth || 150;
+  const travel = Math.max(rect.width - busW, 1);
+  const delta = (event.clientX - dragOriginX) / travel;
+  setBusProgress(dragOriginProgress + delta);
+}
+function onBusPointerUp(event) {
+  if (!busDragging) return;
+  busDragging = false;
+  journey.classList.remove("is-dragging");
+  try { bus.releasePointerCapture(event.pointerId); } catch { /* already released */ }
+}
+bus.addEventListener("pointerdown", onBusPointerDown);
+bus.addEventListener("pointermove", onBusPointerMove);
+bus.addEventListener("pointerup", onBusPointerUp);
+bus.addEventListener("pointercancel", onBusPointerUp);
+setBusProgress(0.02);
+
+function launchFireworks() {
+  if (!fireworksCanvas || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    showToast("Chegou no Rio!");
+    return;
+  }
+  const ctx = fireworksCanvas.getContext("2d");
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  const resize = () => {
+    fireworksCanvas.width = Math.floor(innerWidth * dpr);
+    fireworksCanvas.height = Math.floor(innerHeight * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  };
+  resize();
+  fireworksCanvas.classList.add("is-on");
+  const colors = ["#1E4FD8", "#4d7ef0", "#E8C468", "#fff", "#7ec8ff", "#ffd76a"];
+  const bursts = [];
+  const spawnBurst = (x, y) => {
+    const particles = [];
+    for (let i = 0; i < 42; i++) {
+      const angle = (Math.PI * 2 * i) / 42 + Math.random() * 0.2;
+      const speed = 2.2 + Math.random() * 4.8;
+      particles.push({
+        x, y,
+        vx: Math.cos(angle) * speed,
+        vy: Math.sin(angle) * speed,
+        life: 1,
+        color: colors[(Math.random() * colors.length) | 0],
+        size: 1.6 + Math.random() * 2.4
+      });
+    }
+    bursts.push({ particles });
+  };
+  for (let i = 0; i < 5; i++) {
+    setTimeout(() => {
+      spawnBurst(innerWidth * (0.18 + Math.random() * 0.64), innerHeight * (0.18 + Math.random() * 0.35));
+    }, i * 280);
+  }
+  const started = performance.now();
+  const tick = now => {
+    ctx.clearRect(0, 0, innerWidth, innerHeight);
+    bursts.forEach(burst => {
+      burst.particles.forEach(p => {
+        p.vy += 0.045;
+        p.vx *= 0.992;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.life -= 0.012;
+        if (p.life <= 0) return;
+        ctx.globalAlpha = Math.max(p.life, 0);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    });
+    ctx.globalAlpha = 1;
+    if (now - started < 4200) fireworksRaf = requestAnimationFrame(tick);
+    else {
+      ctx.clearRect(0, 0, innerWidth, innerHeight);
+      fireworksCanvas.classList.remove("is-on");
+      cancelAnimationFrame(fireworksRaf);
+    }
+  };
+  fireworksRaf = requestAnimationFrame(tick);
+  addEventListener("resize", resize, { once: true });
+}
+function arriveInRio() {
+  busArrived = true;
+  setBusProgress(1);
+  journey.classList.add("arrived");
+  if (busHint) busHint.hidden = true;
+  bus.setAttribute("aria-label", "Ônibus chegou ao Rio de Janeiro");
+  launchFireworks();
+  showToast("Chegou no Rio!");
+}
+
 function onScroll() {
-  const max = Math.max(document.documentElement.scrollHeight - innerHeight, 1);
-  bus.style.setProperty("--bus", Math.min(scrollY / (max * 0.6), 1).toFixed(3));
   document.body.classList.toggle("scrolled", scrollY > innerHeight * .75);
 }
 addEventListener("scroll", onScroll, { passive: true });
 onScroll();
-setTimeout(() => bus.style.setProperty("--bus", "0.02"), 50);
 
 new IntersectionObserver(([entry]) => {
   document.body.classList.toggle("form-in-view", entry.isIntersecting);

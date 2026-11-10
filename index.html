@@ -76,7 +76,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap"></noscript>
   <link rel="preload" as="image" href="./image/guido-schaffer-696x392.jpeg" fetchpriority="high">
-  <link rel="stylesheet" href="./styles.css?v=11">
+  <link rel="stylesheet" href="./styles.css?v=12">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -200,14 +200,16 @@
         <li><b>R$ 30</b><span>via PIX</span></li>
       </ul>
 
-      <div class="journey" aria-label="Ônibus saindo de Saquarema em direção ao Rio de Janeiro">
+      <div class="journey" id="journey" aria-label="Arraste o ônibus de Bacaxá até o Rio de Janeiro">
+        <p class="journey-hint" id="bus-hint">Arraste o ônibus →</p>
         <div class="landmark lm-start"><img src="./image/igreja-santo-antonio.min.png" alt="Igreja de Santo Antônio, Bacaxá" width="260" height="260" decoding="async"><b>BACAXÁ</b></div>
-        <div class="landmark lm-end"><img src="./image/rio-de-janeiro.png" alt="Rio de Janeiro" width="322" height="158" decoding="async"></div>
+        <div class="landmark lm-end"><img src="./image/rio-de-janeiro.png" alt="Rio de Janeiro" width="322" height="158" decoding="async"><b>RIO DE JANEIRO</b></div>
         <div class="road"><span></span></div>
-        <div class="bus" id="bus" aria-hidden="true">
-          <img src="./image/onibus-riolagos.min.png" alt="" width="320" height="183" decoding="async">
-        </div>
+        <button type="button" class="bus" id="bus" aria-label="Arraste o ônibus até o Rio">
+          <img src="./image/onibus-riolagos.min.png" alt="" width="320" height="183" decoding="async" draggable="false">
+        </button>
       </div>
+      <canvas id="fireworks" class="fireworks" aria-hidden="true"></canvas>
     </section>
 
     <section class="route section" id="roteiro">
@@ -594,6 +596,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=24"></script>
+  <script type="module" src="./app.js?v=25"></script>
 </body>
 </html>

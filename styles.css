@@ -66,15 +66,24 @@ h1,h2,h3,p{margin:0}
 .facts b{font-size:22px;color:var(--royal);font-weight:700;letter-spacing:-.02em}
 .facts span{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
 
-.journey{position:relative;z-index:2;width:min(980px,100%);height:140px;margin-top:28px}
+.journey{position:relative;z-index:2;width:min(980px,100%);height:158px;margin-top:28px;touch-action:none;user-select:none}
+.journey-hint{position:absolute;left:50%;top:0;transform:translateX(-50%);margin:0;padding:6px 14px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid var(--glass-line);color:var(--royal);font-size:12px;font-weight:700;letter-spacing:.04em;white-space:nowrap;box-shadow:0 8px 18px rgba(22,58,156,.12);animation:hint-pulse 1.6s ease-in-out infinite;pointer-events:none;z-index:3}
+.journey.arrived .journey-hint,.journey.is-dragging .journey-hint{opacity:0;visibility:hidden;animation:none}
+@keyframes hint-pulse{50%{transform:translateX(-50%) translateY(-2px)}}
 .landmark{position:absolute;bottom:34px;color:var(--ink);text-align:center;font-size:10px;letter-spacing:.14em;font-weight:700}
 .landmark img{display:block;margin:0 auto 4px;height:96px;width:auto;object-fit:contain;filter:drop-shadow(0 4px 8px rgba(22,58,156,.2))}
 .lm-start{left:0}.lm-end{right:0}.lm-end img{height:auto;width:150px}
 .road{position:absolute;left:0;right:0;bottom:0;height:34px;background:var(--ink-2);border-radius:14px 14px 0 0}
 .road span{position:absolute;left:0;right:0;top:15px;border-top:3px dashed rgba(255,255,255,.55)}
-.bus{position:absolute;bottom:14px;left:calc(var(--bus,0) * (100% - 150px));width:150px;transition:left .15s linear}
-.bus img{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25));animation:bump 1.2s ease-in-out infinite}
+.bus{position:absolute;bottom:14px;left:calc(var(--bus,0.02) * (100% - var(--bus-w,150px)));width:var(--bus-w,150px);padding:0;border:0;background:transparent;cursor:grab;touch-action:none;z-index:4}
+.bus:active,.journey.is-dragging .bus{cursor:grabbing}
+.bus img{display:block;width:100%;height:auto;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.25));animation:bump 1.2s ease-in-out infinite}
+.journey.is-dragging .bus img,.journey.arrived .bus img{animation:none}
+.journey.arrived .lm-end{animation:arrive-pop .55s ease}
 @keyframes bump{50%{transform:translateY(-2px)}}
+@keyframes arrive-pop{0%{transform:scale(1)}40%{transform:scale(1.08)}100%{transform:scale(1)}}
+.fireworks{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80;opacity:0}
+.fireworks.is-on{opacity:1}
 
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 22px;border-radius:999px;border:1px solid transparent;font-weight:700;font-size:14px;text-decoration:none;cursor:pointer;transition:transform .2s,box-shadow .2s,filter .2s,background .2s}
 .btn:hover{transform:translateY(-2px)}
@@ -461,10 +470,10 @@ body.scrolled .to-top{opacity:1;visibility:visible;transform:none}
   .countdown em{width:100%;margin-left:0}
   .info-card{padding:16px}
   .faq-list summary{padding:13px 14px;font-size:14px}
-  .journey{height:120px;margin-top:20px}
+  .journey{height:132px;margin-top:20px;--bus-w:78px}
+  .journey-hint{font-size:11px;padding:5px 12px;top:2px}
   .landmark img{height:72px}
   .lm-end img{width:120px}
-  .bus{width:78px}
   .timeline:before{left:57px}
   .t-item{grid-template-columns:50px 1fr;gap:22px}
   .t-item:before{left:51px}
