@@ -325,34 +325,41 @@ async function printShell(title, extraCss, body) {
   <style>
     :root{--blue:#1E4FD8;--ink:#163a9c;--muted:#4d6494;--paper:#f4f7fb}
     *{box-sizing:border-box}
-    body{margin:0;background:#d9e4f4;color:#163a9c;font:14px/1.55 Sora,system-ui,sans-serif}
-    .sheet{max-width:920px;margin:28px auto;padding:36px 40px 32px;background:#fff;border:1px solid #c9d7ee;box-shadow:0 18px 40px rgba(22,58,156,.12)}
-    .letterhead{display:flex;align-items:center;gap:16px;padding-bottom:18px;border-bottom:3px solid var(--blue);margin-bottom:22px}
-    .letterhead img{width:72px;height:72px;object-fit:contain;border-radius:50%;flex:none}
+    body{margin:0;background:#d9e4f4;color:#163a9c;font:15px/1.7 Sora,system-ui,sans-serif}
+    .sheet{max-width:920px;margin:28px auto;padding:48px 52px 40px;background:#fff;border:1px solid #c9d7ee;box-shadow:0 18px 40px rgba(22,58,156,.12)}
+    .letterhead{display:flex;align-items:center;gap:20px;padding-bottom:24px;border-bottom:3px solid var(--blue);margin-bottom:32px}
+    .letterhead img{width:76px;height:76px;object-fit:contain;border-radius:50%;flex:none}
     .letterhead p{margin:0;letter-spacing:.16em;text-transform:uppercase;font-size:11px;font-weight:700;color:var(--blue)}
-    .letterhead h1{margin:4px 0 0;font:italic 700 28px/1.1 "Libre Baskerville",Georgia,serif;color:var(--ink);letter-spacing:0;text-transform:none}
-    .letterhead small{display:block;margin-top:4px;color:var(--muted);font-size:12px;letter-spacing:0;text-transform:none;font-weight:400}
-    h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin:26px 0 10px}
-    p{margin:0 0 10px}
-    .meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 18px;padding:12px 16px;background:var(--paper);border-left:4px solid var(--blue)}
+    .letterhead h1{margin:8px 0 0;font:italic 700 30px/1.15 "Libre Baskerville",Georgia,serif;color:var(--ink);letter-spacing:0;text-transform:none}
+    .letterhead small{display:block;margin-top:8px;color:var(--muted);font-size:13px;letter-spacing:0;text-transform:none;font-weight:400}
+    h2{font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin:36px 0 14px}
+    p{margin:0 0 16px;line-height:1.75}
+    .lead{font-size:15px;line-height:1.85;margin-bottom:8px}
+    .meta{display:flex;flex-wrap:wrap;gap:10px 20px;margin:0 0 22px;padding:16px 18px;background:var(--paper);border-left:4px solid var(--blue)}
     .meta b{color:var(--ink)}
-    .details{background:var(--paper);padding:16px 18px;border-radius:4px}
-    .details ol{margin:10px 0 0;padding-left:18px}
-    .blank{display:inline-block;min-width:200px;border-bottom:1px solid #8aa0c8}
-    .signature{margin-top:52px;display:flex;gap:28px}
-    .signature div{flex:1;text-align:center;border-top:1px solid #8aa0c8;padding-top:8px;font-size:12px;color:var(--muted)}
-    .small{font-size:11px;color:var(--muted)}
+    .details{background:var(--paper);padding:22px 24px;border-radius:8px;line-height:1.75}
+    .details p{margin:0 0 12px}
+    .details p:last-child{margin-bottom:0}
+    .details .row{margin:0 0 10px}
+    .details .note{margin:14px 0 0;padding-top:12px;border-top:1px solid #d5e0f2}
+    .details ol{margin:16px 0 0;padding-left:22px;display:grid;gap:8px}
+    .details li{padding:2px 0}
+    .blank{display:inline-block;min-width:220px;border-bottom:1px solid #8aa0c8;line-height:1.6;padding:0 4px 2px}
+    .place-date{margin-top:22px}
+    .signature{margin-top:64px;display:flex;gap:36px}
+    .signature div{flex:1;text-align:center;border-top:1px solid #8aa0c8;padding-top:12px;font-size:12px;color:var(--muted);line-height:1.6;min-height:72px}
+    .small{font-size:12px;color:var(--muted);line-height:1.65;margin-top:28px}
     .print-button{position:fixed;top:16px;right:16px;background:var(--blue);color:#fff;border:0;border-radius:999px;padding:12px 18px;font:700 13px Sora,sans-serif;cursor:pointer;box-shadow:0 8px 20px rgba(30,79,216,.3)}
     table{width:100%;border-collapse:collapse;font-size:12px}
-    th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--blue);padding:10px 8px}
-    td{padding:10px 8px;border-bottom:1px solid #d5e0f2;vertical-align:top}
+    th{text-align:left;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:var(--blue);padding:12px 10px}
+    td{padding:12px 10px;border-bottom:1px solid #d5e0f2;vertical-align:top;line-height:1.55}
     tr:nth-child(even) td{background:#f7faff}
     .tag{display:inline-block;padding:3px 8px;border-radius:99px;font-size:10px;font-weight:700;letter-spacing:.04em}
     .tag-ok{background:#d9f5e5;color:#0f6b3c}
     .tag-wait{background:#fff3d6;color:#8a5a00}
-    .foot{margin-top:28px;padding-top:12px;border-top:1px solid #d5e0f2;display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--muted)}
+    .foot{margin-top:36px;padding-top:16px;border-top:1px solid #d5e0f2;display:flex;justify-content:space-between;gap:12px;font-size:11px;color:var(--muted)}
     ${extraCss}
-    @media print{body{background:#fff}.sheet{margin:0;max-width:none;border:0;box-shadow:none;padding:12px 8px}.print-button{display:none}}
+    @media print{body{background:#fff}.sheet{margin:0;max-width:none;border:0;box-shadow:none;padding:28px 24px}.print-button{display:none}}
   </style></head><body>
   <button class="print-button" onclick="window.print()">Imprimir / Salvar como PDF</button>
   <article class="sheet">${body}</article>
@@ -387,12 +394,19 @@ function authorizationMarkup(p) {
   const fill = v => v ? `<b>${escapeHtml(v)}</b>` : '<span class="blank"></span>';
   const stops = SITE_CONFIG.itinerary.slice(2).map(s => `<li>${escapeHtml(s)}</li>`).join("");
   return `${letterhead("Autorização de menor", SITE_CONFIG.tourName)}
-  <p>Eu, ${fill(p.guardian_name)}, documento ${fill(p.guardian_document)}, telefone ${fill(p.guardian_phone)}, responsável legal, <b>autorizo</b> ${fill(p.full_name)}, nascido(a) em ${fill(born)}, a participar da Peregrinação Jovem em <b>${escapeHtml(SITE_CONFIG.tourDate)}</b>.</p>
+  <p class="lead">Eu, ${fill(p.guardian_name)}, documento ${fill(p.guardian_document)}, telefone ${fill(p.guardian_phone)}, responsável legal, <b>autorizo</b> ${fill(p.full_name)}, nascido(a) em ${fill(born)}, a participar da Peregrinação Jovem em <b>${escapeHtml(SITE_CONFIG.tourDate)}</b>.</p>
   <h2>Roteiro e pagamento</h2>
-  <div class="details"><p><b>06h00</b> Concentração — ${escapeHtml(SITE_CONFIG.meetingPoint)}<br><b>06h30</b> Saída do ônibus<br><b>Valor</b> R$ 30,00 via PIX para ${escapeHtml(SITE_CONFIG.pixLabel)}, ${escapeHtml(SITE_CONFIG.pixName)}<br><b>Envie o comprovante no WhatsApp de ${escapeHtml(SITE_CONFIG.pixName)}: ${escapeHtml(SITE_CONFIG.pixLabel)}.</b><br><b>A vaga só é confirmada depois do pagamento. A autorização assinada deve ser entregue no dia do passeio.</b></p><ol>${stops}</ol></div>
+  <div class="details">
+    <p class="row"><b>06h00</b> Concentração — ${escapeHtml(SITE_CONFIG.meetingPoint)}</p>
+    <p class="row"><b>06h30</b> Saída do ônibus</p>
+    <p class="row"><b>Valor</b> R$ 30,00 via PIX para ${escapeHtml(SITE_CONFIG.pixLabel)}, ${escapeHtml(SITE_CONFIG.pixName)}</p>
+    <p class="row"><b>Envie o comprovante no WhatsApp de ${escapeHtml(SITE_CONFIG.pixName)}:</b> ${escapeHtml(SITE_CONFIG.pixLabel)}.</p>
+    <p class="note"><b>A vaga só é confirmada depois do pagamento.</b> A autorização assinada deve ser entregue no dia do passeio.</p>
+    <ol>${stops}</ol>
+  </div>
   <h2>Declaração</h2>
   <p>Conheço o roteiro, os horários e o valor. Autorizo a ida do menor, confirmo que os dados são verdadeiros e permaneço disponível em caso de emergência.</p>
-  <p>Local e data: <span class="blank"></span>, ____/____/________.</p>
+  <p class="place-date">Local e data: <span class="blank"></span>, ____/____/________.</p>
   <div class="signature"><div>Assinatura do(a) responsável<br><span>${escapeHtml(p.guardian_name || "")}</span></div><div>Telefone<br><span>${escapeHtml(p.guardian_phone || "")}</span></div></div>
   <p class="small">Entregar este documento assinado à coordenação <b>no dia do passeio</b>, na concentração (6h). Comprovante do PIX: WhatsApp de ${escapeHtml(SITE_CONFIG.pixName)}, ${escapeHtml(SITE_CONFIG.pixLabel)}.</p>
   ${printFoot()}`;
