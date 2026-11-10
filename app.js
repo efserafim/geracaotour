@@ -551,16 +551,29 @@ function renderDashboard() {
     const minor = ageAt(p.birth_date) < 18;
     const done = p.authorization_status === "delivered";
     const paid = isPaid(p);
-    const auth = minor ? `<button class="status-pill ${done ? "status-done" : "status-pending"}" data-action="authorization" data-id="${p.id}">${done ? "Entregue" : "Pendente"}</button><button class="table-icon" title="Reemitir autorização" aria-label="Reemitir autorização de ${escapeHtml(p.full_name)}" data-action="reissue" data-id="${p.id}">⤓</button>` : '<span class="muted">—</span>';
+    const note = (p.dietary_notes || "").trim();
+    const auth = minor
+      ? `<button class="status-pill ${done ? "status-done" : "status-pending"}" data-action="authorization" data-id="${p.id}">${done ? "Entregue" : "Pendente"}</button><button class="table-icon" title="Reemitir autorização" aria-label="Reemitir autorização de ${escapeHtml(p.full_name)}" data-action="reissue" data-id="${p.id}">⤓</button>`
+      : '<span class="muted">—</span>';
     return `<tr class="${paid ? "row-paid" : "row-unpaid"}">
-      <td class="dash-cell-name" data-label="Participante"><b>${escapeHtml(p.full_name)}</b>${minor ? ' <span class="minor-tag">menor</span>' : ""}<small>${ageLabel(p.birth_date)} · ${escapeHtml(formatBirth(p.birth_date))} · ${escapeHtml(p.document_number)}</small><small>${escapeHtml(p.dietary_notes || p.observations ? `Obs.: ${p.dietary_notes || "—"} · ${p.observations || "—"}` : "")}</small></td>
-      <td data-label="PIX"><button class="status-pill ${paid ? "status-done" : "status-pending"}" data-action="payment" data-id="${p.id}">${paid ? "Pago" : "Aguardando"}</button></td>
-      <td data-label="Contato"><span class="dash-cell-stack">${escapeHtml(p.phone)}<small>${escapeHtml(p.email)}</small></span></td>
-      <td data-label="Emergência"><span class="dash-cell-stack">${escapeHtml(p.emergency_name)}<small>${escapeHtml(p.emergency_phone)}</small></span></td>
-      <td data-label="Responsável"><span class="dash-cell-stack">${escapeHtml(p.guardian_name || "—")}<small>${escapeHtml(p.guardian_phone || "")}</small></span></td>
-      <td data-label="Autorização" class="dash-cell-actions">${auth}</td>
-      <td data-label="Presença"><label class="checkin"><input type="checkbox" data-action="attendance" data-id="${p.id}" ${p.attended ? "checked" : ""}><span>${p.attended ? "Presente" : "Check-in"}</span></label></td>
-      <td data-label="Ações" class="dash-cell-actions"><button class="table-icon" title="Editar" aria-label="Editar ${escapeHtml(p.full_name)}" data-action="edit" data-id="${p.id}">✎</button><button class="table-icon danger-icon" title="Remover" aria-label="Remover ${escapeHtml(p.full_name)}" data-action="remove" data-id="${p.id}">×</button></td>
+      <td class="dash-cell-name" data-label="Participante">
+        <b>${escapeHtml(p.full_name)}</b>${minor ? ' <span class="minor-tag">menor</span>' : ""}
+        <small>${ageLabel(p.birth_date)} · ${escapeHtml(formatBirth(p.birth_date))} · ${escapeHtml(p.document_number)}</small>
+        ${note ? `<small class="dash-note-line">${escapeHtml(note)}</small>` : ""}
+        <span class="dash-mobile-meta">
+          <span>${escapeHtml(p.phone)}</span>
+          <span>${escapeHtml(p.email)}</span>
+          <span>Emerg.: ${escapeHtml(p.emergency_name)} · ${escapeHtml(p.emergency_phone)}</span>
+          ${minor && p.guardian_name ? `<span>Resp.: ${escapeHtml(p.guardian_name)} · ${escapeHtml(p.guardian_phone || "")}</span>` : ""}
+        </span>
+      </td>
+      <td class="dash-cell-pix" data-label="PIX"><button class="status-pill ${paid ? "status-done" : "status-pending"}" data-action="payment" data-id="${p.id}">${paid ? "Pago" : "Aguardando"}</button></td>
+      <td class="dash-cell-contact" data-label="Contato"><span class="dash-cell-stack">${escapeHtml(p.phone)}<small>${escapeHtml(p.email)}</small></span></td>
+      <td class="dash-cell-emergency" data-label="Emergência"><span class="dash-cell-stack">${escapeHtml(p.emergency_name)}<small>${escapeHtml(p.emergency_phone)}</small></span></td>
+      <td class="dash-cell-guardian${minor ? "" : " is-empty"}" data-label="Responsável"><span class="dash-cell-stack">${escapeHtml(p.guardian_name || "—")}<small>${escapeHtml(p.guardian_phone || "")}</small></span></td>
+      <td class="dash-cell-auth dash-cell-actions${minor ? "" : " is-empty"}" data-label="Autorização">${auth}</td>
+      <td class="dash-cell-attend" data-label="Presença"><label class="checkin"><input type="checkbox" data-action="attendance" data-id="${p.id}" ${p.attended ? "checked" : ""}><span>${p.attended ? "Presente" : "Check-in"}</span></label></td>
+      <td class="dash-cell-actions" data-label="Ações"><button class="table-icon" title="Editar" aria-label="Editar ${escapeHtml(p.full_name)}" data-action="edit" data-id="${p.id}">✎</button><button class="table-icon danger-icon" title="Remover" aria-label="Remover ${escapeHtml(p.full_name)}" data-action="remove" data-id="${p.id}">×</button></td>
     </tr>`;
   }).join("") : `<tr class="dash-empty-row"><td colspan="8" class="empty-table">${registrations.length ? "Nenhuma ficha neste filtro." : "Nenhuma ficha ainda."}</td></tr>`;
 }

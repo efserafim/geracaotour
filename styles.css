@@ -214,6 +214,7 @@ input[type=date]{color-scheme:light}
 .dashboard-modal td b{color:var(--ink)}
 .dashboard-modal td small{display:block;color:var(--muted);margin-top:3px;font-size:11px}
 .dash-cell-stack{display:block;min-width:0}
+.dash-mobile-meta{display:none}
 .row-unpaid td:first-child,.row-unpaid{box-shadow:inset 3px 0 0 #e6b325}
 .row-paid td:first-child,.row-paid{box-shadow:inset 3px 0 0 #2e9d62}
 .status-pill{border:0;border-radius:99px;padding:6px 11px;font-size:11px;font-weight:700;cursor:pointer;min-height:32px}
@@ -372,59 +373,83 @@ body.scrolled .to-top{opacity:1;visibility:visible;transform:none}
   .table-wrap{border:0;background:transparent;overflow:visible}
   .dashboard-modal table{min-width:0;border-collapse:separate;border-spacing:0}
   .dashboard-modal thead{display:none}
-  .dashboard-modal tbody{display:grid;gap:12px}
+  .dashboard-modal tbody{display:grid;gap:10px}
   .dashboard-modal tr{
     display:grid;
-    gap:10px;
-    padding:14px;
-    border-radius:16px;
+    grid-template-columns:1fr auto auto;
+    gap:6px 8px;
+    align-items:center;
+    padding:12px;
+    border-radius:14px;
     background:#fff;
     border:1px solid #d5e0f2;
-    box-shadow:0 8px 20px rgba(22,58,156,.06);
+    box-shadow:0 6px 16px rgba(22,58,156,.05);
   }
-  .dashboard-modal tr.dash-empty-row{
-    box-shadow:none;
-  }
+  .dashboard-modal tr.dash-empty-row{box-shadow:none}
   .dashboard-modal td{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
+    display:block;
     border:0;
     padding:0;
     box-shadow:none!important;
   }
-  .dashboard-modal td::before{
-    content:attr(data-label);
-    flex:none;
-    max-width:36%;
-    font-size:10px;
-    font-weight:700;
-    letter-spacing:.08em;
-    text-transform:uppercase;
-    color:var(--muted);
-  }
+  .dashboard-modal td::before{display:none}
   .dashboard-modal .dash-cell-name{
+    grid-column:1 / -1;
+    display:flex;
     flex-direction:column;
     align-items:flex-start;
-    gap:4px;
-    padding-bottom:10px;
+    gap:2px;
+    padding-bottom:8px;
+    margin-bottom:2px;
     border-bottom:1px solid #e7eef8;
   }
-  .dashboard-modal .dash-cell-name::before{display:none}
-  .dashboard-modal .dash-cell-name b{font-size:15px;line-height:1.25}
-  .dashboard-modal .dash-cell-stack{text-align:right}
-  .dashboard-modal .dash-cell-actions{align-items:center;gap:8px}
+  .dashboard-modal .dash-cell-name b{font-size:14px;line-height:1.25}
+  .dashboard-modal .dash-cell-name > small{font-size:11px;margin-top:0}
+  .dashboard-modal .dash-note-line{color:var(--ink)!important;font-weight:600}
+  .dashboard-modal .dash-mobile-meta{
+    display:flex;
+    flex-direction:column;
+    gap:1px;
+    margin-top:4px;
+    width:100%;
+  }
+  .dashboard-modal .dash-mobile-meta span{
+    display:block;
+    color:var(--muted);
+    font-size:11px;
+    line-height:1.35;
+    word-break:break-word;
+  }
+  .dashboard-modal .dash-cell-contact,
+  .dashboard-modal .dash-cell-emergency,
+  .dashboard-modal .dash-cell-guardian{display:none}
+  .dashboard-modal .dash-cell-pix{justify-self:start}
+  .dashboard-modal .dash-cell-auth{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:center;
+    gap:6px;
+  }
+  .dashboard-modal .dash-cell-auth.is-empty,
+  .dashboard-modal .dash-cell-guardian.is-empty{display:none}
+  .dashboard-modal .dash-cell-attend{justify-self:end}
+  .dashboard-modal .dash-cell-actions{
+    display:flex;
+    align-items:center;
+    gap:4px;
+    justify-self:end;
+  }
   .dashboard-modal .dash-cell-actions .status-pill,
   .dashboard-modal .dash-cell-actions .table-icon{margin:0}
-  .row-unpaid{box-shadow:inset 4px 0 0 #e6b325,0 8px 20px rgba(22,58,156,.06)}
-  .row-paid{box-shadow:inset 4px 0 0 #2e9d62,0 8px 20px rgba(22,58,156,.06)}
-  .status-pill{min-height:36px;padding:8px 14px;font-size:12px}
-  .table-icon{width:40px;height:40px;margin-left:0}
-  .empty-table{padding:28px 12px!important}
+  .row-unpaid{box-shadow:inset 3px 0 0 #e6b325,0 6px 16px rgba(22,58,156,.05)}
+  .row-paid{box-shadow:inset 3px 0 0 #2e9d62,0 6px 16px rgba(22,58,156,.05)}
+  .status-pill{min-height:32px;padding:6px 11px;font-size:11px}
+  .table-icon{width:34px;height:34px;margin-left:0}
+  .checkin{gap:6px;font-size:12px}
+  .empty-table{padding:24px 12px!important}
   .dash-note{font-size:11px;line-height:1.45}
+  .dash-empty-row{display:block}
   .dash-empty-row td{display:block;text-align:center}
-  .dash-empty-row td::before{display:none}
 }
 @media(max-width:560px){
   .hero{padding-top:96px}
