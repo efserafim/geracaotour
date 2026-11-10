@@ -18,7 +18,7 @@ export const SITE_CONFIG = {
 
   siteUrl: "https://geracaotour.netlify.app/",
   shareText: "Sábado 05/12 tem Peregrinação Jovem da Geração Eucarística. De Bacaxá ao Rio, R$ 30. Bora?",
-  coordinatorWhatsapp: "5522997812588",
+  coordinatorWhatsapp: "5522920050790",
   pixKey: "22998750491",
   pixLabel: "(22) 99875-0491",
   pixName: "Welerson",
