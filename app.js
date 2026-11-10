@@ -1,4 +1,4 @@
-import { SITE_CONFIG, API_BASE } from "./config.js?v=9";
+import { SITE_CONFIG, API_BASE } from "./config.js?v=10";
 
 const TOKEN_KEY = "geracao-tour-token";
 const $ = (selector, root = document) => root.querySelector(selector);
