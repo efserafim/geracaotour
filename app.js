@@ -344,7 +344,7 @@ async function printShell(title, extraCss, body) {
     .details .note{margin:14px 0 0;padding-top:12px;border-top:1px solid #d5e0f2}
     .details ol{margin:16px 0 0;padding-left:22px;display:grid;gap:8px}
     .details li{padding:2px 0}
-    .blank{display:inline-block;min-width:220px;border-bottom:1px solid #8aa0c8;line-height:1.6;padding:0 4px 2px}
+    .blank{display:inline-block;min-width:260px;min-height:1.35em;border-bottom:2px solid #8aa0c8;line-height:1.6;padding:0 6px 4px;vertical-align:baseline}
     .place-date{margin-top:22px}
     .signature{margin-top:64px;display:flex;gap:36px}
     .signature div{flex:1;text-align:center;border-top:1px solid #8aa0c8;padding-top:12px;font-size:12px;color:var(--muted);line-height:1.6;min-height:72px}
@@ -390,7 +390,7 @@ function ageLabel(dateString) {
   return Number.isFinite(age) ? `${age} anos` : "—";
 }
 function authorizationMarkup(p) {
-  const born = formatBirth(p.birth_date);
+  const born = dateOnly(p.birth_date) ? formatBirth(p.birth_date) : "";
   const fill = v => v ? `<b>${escapeHtml(v)}</b>` : '<span class="blank"></span>';
   const stops = SITE_CONFIG.itinerary.slice(2).map(s => `<li>${escapeHtml(s)}</li>`).join("");
   return `${letterhead("Autorização de menor", SITE_CONFIG.tourName)}
