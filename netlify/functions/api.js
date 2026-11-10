@@ -21,6 +21,20 @@ const ALLOWED_UPDATE = new Set([
   "authorization_status", "payment_status", "paid_at", "attended"
 ]);
 
+/** Neon DATE values serialize as ISO timestamps; keep YYYY-MM-DD for the UI. */
+function serializeRegistration(row) {
+  if (!row) return row;
+  const birth = row.birth_date;
+  let birth_date = birth;
+  if (birth instanceof Date && !Number.isNaN(birth.getTime())) {
+    birth_date = birth.toISOString().slice(0, 10);
+  } else if (birth != null) {
+    const match = String(birth).match(/^(\d{4}-\d{2}-\d{2})/);
+    birth_date = match ? match[1] : birth;
+  }
+  return { ...row, birth_date };
+}
+
 export async function handler(event) {
   if (event.httpMethod === "OPTIONS") return options();
 
@@ -147,7 +161,7 @@ async function listRegistrations(event) {
     from public.registrations
     order by created_at desc
   `;
-  return ok({ data: rows });
+  return ok({ data: rows.map(serializeRegistration) });
 }
 
 async function updateRegistration(event, id) {
@@ -207,7 +221,7 @@ async function updateRegistration(event, id) {
       where r.id = ${id}::uuid
       returning r.*`;
     if (!rows.length) return json(404, { error: "NOT_FOUND" });
-    return ok({ data: rows[0] });
+    return ok({ data: serializeRegistration(rows[0]) });
   } catch (error) {
     const code = sqlErrorCode(error);
     const status = code === "DUPLICATE_REGISTRATION" || code === "INVALID_PARTICIPANT" ? 409 : 500;

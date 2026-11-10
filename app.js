@@ -57,8 +57,23 @@ $("#yt").src = SITE_CONFIG.videoUrl;
 
 /* ---------- Utilidades ---------- */
 function digits(value) { return (value || "").replace(/\D/g, ""); }
+/** Neon/JSON may send "YYYY-MM-DD" or "YYYY-MM-DDT00:00:00.000Z". */
+function dateOnly(value) {
+  if (!value) return "";
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const y = value.getUTCFullYear();
+    const m = String(value.getUTCMonth() + 1).padStart(2, "0");
+    const d = String(value.getUTCDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+  const match = String(value).match(/^(\d{4}-\d{2}-\d{2})/);
+  return match ? match[1] : "";
+}
 function ageAt(dateString) {
-  const birth = new Date(`${dateString}T00:00:00`);
+  const day = dateOnly(dateString);
+  if (!day) return NaN;
+  const birth = new Date(`${day}T00:00:00`);
+  if (Number.isNaN(birth.getTime())) return NaN;
   const today = new Date();
   let age = today.getFullYear() - birth.getFullYear();
   if (today.getMonth() < birth.getMonth() ||
@@ -358,9 +373,14 @@ function printFoot() {
 function isPaid(p) { return p.payment_status === "paid"; }
 function pixLabel(p) { return isPaid(p) ? '<span class="tag tag-ok">PIX pago</span>' : '<span class="tag tag-wait">Aguardando PIX</span>'; }
 function formatBirth(dateString) {
-  if (!dateString) return "—";
-  const d = new Date(`${dateString}T00:00:00`);
-  return Number.isNaN(d.getTime()) ? dateString : d.toLocaleDateString("pt-BR");
+  const day = dateOnly(dateString);
+  if (!day) return "—";
+  const d = new Date(`${day}T00:00:00`);
+  return Number.isNaN(d.getTime()) ? "—" : d.toLocaleDateString("pt-BR");
+}
+function ageLabel(dateString) {
+  const age = ageAt(dateString);
+  return Number.isFinite(age) ? `${age} anos` : "—";
 }
 function authorizationMarkup(p) {
   const born = formatBirth(p.birth_date);
@@ -519,7 +539,7 @@ function renderDashboard() {
     const paid = isPaid(p);
     const auth = minor ? `<button class="status-pill ${done ? "status-done" : "status-pending"}" data-action="authorization" data-id="${p.id}">${done ? "Entregue" : "Pendente"}</button><button class="table-icon" title="Reemitir autorização" aria-label="Reemitir autorização de ${escapeHtml(p.full_name)}" data-action="reissue" data-id="${p.id}">⤓</button>` : '<span class="muted">—</span>';
     return `<tr class="${paid ? "row-paid" : "row-unpaid"}">
-      <td class="dash-cell-name" data-label="Participante"><b>${escapeHtml(p.full_name)}</b>${minor ? ' <span class="minor-tag">menor</span>' : ""}<small>${ageAt(p.birth_date)} anos · ${escapeHtml(formatBirth(p.birth_date))} · ${escapeHtml(p.document_number)}</small><small>${escapeHtml(p.dietary_notes || p.observations ? `Obs.: ${p.dietary_notes || "—"} · ${p.observations || "—"}` : "")}</small></td>
+      <td class="dash-cell-name" data-label="Participante"><b>${escapeHtml(p.full_name)}</b>${minor ? ' <span class="minor-tag">menor</span>' : ""}<small>${ageLabel(p.birth_date)} · ${escapeHtml(formatBirth(p.birth_date))} · ${escapeHtml(p.document_number)}</small><small>${escapeHtml(p.dietary_notes || p.observations ? `Obs.: ${p.dietary_notes || "—"} · ${p.observations || "—"}` : "")}</small></td>
       <td data-label="PIX"><button class="status-pill ${paid ? "status-done" : "status-pending"}" data-action="payment" data-id="${p.id}">${paid ? "Pago" : "Aguardando"}</button></td>
       <td data-label="Contato"><span class="dash-cell-stack">${escapeHtml(p.phone)}<small>${escapeHtml(p.email)}</small></span></td>
       <td data-label="Emergência"><span class="dash-cell-stack">${escapeHtml(p.emergency_name)}<small>${escapeHtml(p.emergency_phone)}</small></span></td>
@@ -612,7 +632,10 @@ const EDIT_KEYS = ["full_name", "birth_date", "document_number", "phone", "email
 function openEdit(person) {
   const form = $("#edit-form");
   form.elements.id.value = person.id;
-  EDIT_KEYS.forEach(k => { form.elements[k].value = person[k] || ""; });
+  EDIT_KEYS.forEach(k => {
+    const raw = person[k] || "";
+    form.elements[k].value = k === "birth_date" ? dateOnly(raw) : raw;
+  });
   $("#edit-error").textContent = "";
   $("#edit-dialog").showModal();
 }
@@ -667,7 +690,7 @@ $("#export-pdf").addEventListener("click", () => {
   const paidCount = visible.filter(isPaid).length;
   const rows = visible.map((p, i) => {
     const minor = ageAt(p.birth_date) < 18;
-    return `<tr><td>${i + 1}</td><td><b>${escapeHtml(p.full_name)}</b><br><span class="small">${escapeHtml(formatBirth(p.birth_date))} · ${ageAt(p.birth_date)} anos</span></td><td>${escapeHtml(p.phone)}<br><span class="small">${escapeHtml(p.email)}</span></td><td>${pixLabel(p)}</td><td>${minor ? `${escapeHtml(p.guardian_name || "—")}<br><span class="small">${escapeHtml(p.guardian_phone || "")}</span>` : "—"}</td><td>${p.attended ? "Presente" : "—"}</td></tr>`;
+    return `<tr><td>${i + 1}</td><td><b>${escapeHtml(p.full_name)}</b><br><span class="small">${escapeHtml(formatBirth(p.birth_date))} · ${ageLabel(p.birth_date)}</span></td><td>${escapeHtml(p.phone)}<br><span class="small">${escapeHtml(p.email)}</span></td><td>${pixLabel(p)}</td><td>${minor ? `${escapeHtml(p.guardian_name || "—")}<br><span class="small">${escapeHtml(p.guardian_phone || "")}</span>` : "—"}</td><td>${p.attended ? "Presente" : "—"}</td></tr>`;
   }).join("");
   printShell("Lista de inscritos — Peregrinação Jovem", "@page{size:landscape}",
     `${letterhead("Lista de inscritos", SITE_CONFIG.tourName)}
