@@ -85,8 +85,10 @@ export async function ensureSchema(sql = getSql()) {
     )
   `;
   await sql`create unique index if not exists waitlist_document_unique on public.waitlist (document_digits)`;
-  await sql`create unique index if not exists waitlist_name_birth_unique
-    on public.waitlist (lower(regexp_replace(trim(full_name), '\s+', ' ', 'g')), birth_date)`;
+  // Escape \\s/\\D/\\d: template strings swallow single backslashes before creating SQL.
+  await sql`drop index if exists public.waitlist_name_birth_unique`;
+  await sql`create unique index waitlist_name_birth_unique
+    on public.waitlist (lower(regexp_replace(trim(full_name), '\\s+', ' ', 'g')), birth_date)`;
 
   await sql`
     create or replace function public.public_capacity()
@@ -120,26 +122,26 @@ export async function ensureSchema(sql = getSql()) {
       if coalesce((participant ->> 'consent')::boolean, false) is not true
         or length(trim(coalesce(participant ->> 'full_name', ''))) < 3
         or length(trim(coalesce(participant ->> 'document_number', ''))) < 5
-        or length(regexp_replace(coalesce(participant ->> 'document_number', ''), '\D', '', 'g')) < 5
+        or length(regexp_replace(coalesce(participant ->> 'document_number', ''), '\\D', '', 'g')) < 5
         or length(trim(coalesce(participant ->> 'phone', ''))) < 8
         or length(trim(coalesce(participant ->> 'email', ''))) < 5
         or length(trim(coalesce(participant ->> 'emergency_name', ''))) < 3
         or length(trim(coalesce(participant ->> 'emergency_phone', ''))) < 8
-        or coalesce(participant ->> 'birth_date', '') !~ '^\d{4}-\d{2}-\d{2}$'
+        or coalesce(participant ->> 'birth_date', '') !~ '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'
       then
         raise exception 'INVALID_PARTICIPANT';
       end if;
 
       participant_birth := (participant ->> 'birth_date')::date;
-      normalized_name := lower(regexp_replace(trim(participant ->> 'full_name'), '\s+', ' ', 'g'));
-      normalized_document := regexp_replace(participant ->> 'document_number', '\D', '', 'g');
+      normalized_name := lower(regexp_replace(trim(participant ->> 'full_name'), '\\s+', ' ', 'g'));
+      normalized_document := regexp_replace(participant ->> 'document_number', '\\D', '', 'g');
 
       if participant_birth > current_date or length(normalized_document) > 14 then
         raise exception 'INVALID_PARTICIPANT';
       end if;
       if participant_birth > (current_date - interval '18 years')
         and (length(trim(coalesce(participant ->> 'guardian_name', ''))) < 3
-          or length(regexp_replace(coalesce(participant ->> 'guardian_document', ''), '\D', '', 'g')) < 5
+          or length(regexp_replace(coalesce(participant ->> 'guardian_document', ''), '\\D', '', 'g')) < 5
           or length(trim(coalesce(participant ->> 'guardian_phone', ''))) < 8
           or coalesce((participant ->> 'guardian_consent')::boolean, false) is not true)
       then
@@ -149,13 +151,13 @@ export async function ensureSchema(sql = getSql()) {
       if exists (select 1 from public.registrations where document_digits = normalized_document)
         or exists (
           select 1 from public.registrations
-          where lower(regexp_replace(trim(full_name), '\s+', ' ', 'g')) = normalized_name
+          where lower(regexp_replace(trim(full_name), '\\s+', ' ', 'g')) = normalized_name
             and birth_date = participant_birth
         )
         or exists (select 1 from public.waitlist where document_digits = normalized_document)
         or exists (
           select 1 from public.waitlist
-          where lower(regexp_replace(trim(full_name), '\s+', ' ', 'g')) = normalized_name
+          where lower(regexp_replace(trim(full_name), '\\s+', ' ', 'g')) = normalized_name
             and birth_date = participant_birth
         )
       then
