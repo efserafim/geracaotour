@@ -76,7 +76,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap"></noscript>
   <link rel="preload" as="image" href="./image/guido-schaffer-696x392.jpeg" fetchpriority="high">
-  <link rel="stylesheet" href="./styles.css?v=17">
+  <link rel="stylesheet" href="./styles.css?v=18">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -517,7 +517,7 @@
       <div class="dash-title">
         <p class="eyebrow">PEREGRINAÇÃO JOVEM · COORDENAÇÃO</p>
         <h2>Inscrições</h2>
-        <p class="dash-sub">Vaga confirmada somente com PIX pago.</p>
+        <p class="dash-sub" id="dash-sub">Vaga confirmada somente com PIX pago.</p>
       </div>
       <button class="modal-close" id="dashboard-close" aria-label="Fechar">×</button>
       <div class="dash-actions">
@@ -528,11 +528,15 @@
         <button class="btn btn-ghost sm" id="logout-button">Sair</button>
       </div>
     </div>
+    <div id="dash-waitlist" class="dash-waitlist" hidden>
+      <b>Lista de espera aberta no site</b>
+      <span>A ficha pública está fechada. Quem quiser entrar manda mensagem no WhatsApp da Bia; a coordenação chama se surgir vaga.</span>
+    </div>
     <div class="stats">
       <article><span>Fichas</span><b id="stat-total">0</b></article>
       <article class="stat-paid"><span>PIX pagos</span><b id="stat-paid">0</b></article>
       <article class="stat-wait"><span>Aguardando PIX</span><b id="stat-unpaid">0</b></article>
-      <article><span>Vagas livres</span><b id="stat-remaining">33</b></article>
+      <article id="stat-remaining-card"><span id="stat-remaining-label">Vagas livres</span><b id="stat-remaining">33</b></article>
     </div>
     <div class="controls">
       <input id="search-input" type="search" aria-label="Buscar inscritos" placeholder="Buscar nome, telefone ou e-mail ( / )">
@@ -604,6 +608,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=28"></script>
+  <script type="module" src="./app.js?v=29"></script>
 </body>
 </html>

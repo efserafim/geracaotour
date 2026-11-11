@@ -659,10 +659,24 @@ async function signOut() {
 }
 function renderDashboard() {
   const paidCount = registrations.filter(isPaid).length;
+  const remaining = Math.max(tourCapacity - registrations.length, 0);
+  const waitlistOpen = Boolean(SITE_CONFIG.waitlistOpen) || remaining === 0;
   $("#stat-total").textContent = registrations.length;
   $("#stat-paid").textContent = paidCount;
   $("#stat-unpaid").textContent = registrations.length - paidCount;
-  $("#stat-remaining").textContent = Math.max(tourCapacity - registrations.length, 0);
+  $("#stat-remaining").textContent = waitlistOpen ? "Aberta" : remaining;
+  const remainingLabel = $("#stat-remaining-label");
+  const remainingCard = $("#stat-remaining-card");
+  if (remainingLabel) remainingLabel.textContent = waitlistOpen ? "Lista de espera" : "Vagas livres";
+  if (remainingCard) remainingCard.classList.toggle("stat-waitlist", waitlistOpen);
+  const dashWaitlist = $("#dash-waitlist");
+  if (dashWaitlist) dashWaitlist.hidden = !waitlistOpen;
+  const dashSub = $("#dash-sub");
+  if (dashSub) {
+    dashSub.textContent = waitlistOpen
+      ? "Site em lista de espera · vaga confirmada somente com PIX pago."
+      : "Vaga confirmada somente com PIX pago.";
+  }
   const query = normalize($("#search-input").value.trim());
   const filter = $("#filter-select").value;
   visible = registrations.filter(p => {
@@ -678,9 +692,10 @@ function renderDashboard() {
   visible.sort((a, b) => sort === "newest" ? new Date(b.created_at) - new Date(a.created_at) :
     sort === "oldest" ? new Date(a.created_at) - new Date(b.created_at) :
     sort === "birth" ? a.birth_date.localeCompare(b.birth_date) : a.full_name.localeCompare(b.full_name, "pt-BR"));
+  const waitlistNote = waitlistOpen ? " · lista de espera aberta no site" : "";
   $("#dash-count").textContent = visible.length === registrations.length
-    ? `${registrations.length} ficha(s) · ${paidCount} confirmada(s) com PIX.`
-    : `Exibindo ${visible.length} de ${registrations.length} ficha(s).`;
+    ? `${registrations.length} ficha(s) · ${paidCount} confirmada(s) com PIX${waitlistNote}.`
+    : `Exibindo ${visible.length} de ${registrations.length} ficha(s)${waitlistNote}.`;
   $("#registrations-body").innerHTML = visible.length ? visible.map(p => {
     const minor = ageAt(p.birth_date) < 18;
     const done = p.authorization_status === "delivered";

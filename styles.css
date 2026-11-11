@@ -212,6 +212,11 @@ input[type=date]{color-scheme:light}
 .dash-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
 .dashboard-modal .modal-close{position:absolute;right:14px;top:14px;z-index:2}
 .dashboard-modal .btn-ghost{background:#fff;border-color:#d5e0f2;color:var(--ink)}
+.dash-waitlist{display:grid;gap:4px;padding:14px 16px;margin-bottom:16px;border-radius:14px;background:#fde8ea;border:1px solid #f3b4ba;color:#8a1f2c}
+.dash-waitlist b{font-size:14px;color:#7a1824}
+.dash-waitlist span{font-size:13px;line-height:1.45}
+.stat-waitlist{border-color:#f3b4ba;background:#fde8ea}
+.stat-waitlist b,.stat-waitlist span{color:#7a1824}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
 .stats article{padding:16px 18px;border-radius:16px;background:#fff;border:1px solid #d5e0f2}
 .stats span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
