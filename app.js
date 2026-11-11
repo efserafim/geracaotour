@@ -1,4 +1,4 @@
-import { SITE_CONFIG, API_BASE } from "./config.js?v=12";
+import { SITE_CONFIG, API_BASE } from "./config.js?v=13";
 
 const TOKEN_KEY = "geracao-tour-token";
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -306,7 +306,7 @@ function setCapacity(count, capacity = tourCapacity) {
   const remaining = Math.max(tourCapacity - registered, 0);
   waitlistMode = Boolean(SITE_CONFIG.waitlistOpen) || remaining === 0;
   $("#seats-lead").textContent = waitlistMode
-    ? "Vagas encerradas. Preencha a ficha para entrar na lista de espera."
+    ? "Vagas do ônibus encerradas. A lista de espera é ilimitada — entre pela ficha."
     : "A ficha reserva o seu lugar. O PIX de R$ 30 confirma.";
   $("#closed-banner").hidden = !waitlistMode;
   syncWaitlistFormUi();
