@@ -25,6 +25,11 @@ export const SITE_CONFIG = {
   // WhatsApp do Welerson para envio do comprovante do PIX (mesmo número da chave).
   pixWhatsapp: "5522998750491",
 
+  // Lista de espera: true = esconde a ficha e encaminha para o WhatsApp.
+  waitlistOpen: true,
+  waitlistMessage: "As vagas desta saída acabaram. Você pode entrar na lista de espera: se alguém desistir, a coordenação chama por ordem.",
+  waitlistWhatsappText: "Olá! Quero entrar na lista de espera da Peregrinação Jovem (Geração Tour) de 05/12.",
+
   info: {
     price: "R$ 30 no PIX (22) 99875-0491, Welerson. Envie o comprovante no WhatsApp dele. A ficha reserva; o pagamento confirma.",
     returnTime: "",

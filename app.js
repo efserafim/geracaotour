@@ -1,4 +1,4 @@
-import { SITE_CONFIG, API_BASE } from "./config.js?v=10";
+import { SITE_CONFIG, API_BASE } from "./config.js?v=11";
 
 const TOKEN_KEY = "geracao-tour-token";
 const $ = (selector, root = document) => root.querySelector(selector);
@@ -284,24 +284,35 @@ tickCountdown();
 setInterval(tickCountdown, 30000);
 
 /* ---------- Vagas ---------- */
+function setupWaitlistLink() {
+  const link = $("#waitlist-link");
+  const msg = $("#waitlist-message");
+  if (msg && SITE_CONFIG.waitlistMessage) msg.textContent = SITE_CONFIG.waitlistMessage;
+  if (!link) return;
+  const phone = SITE_CONFIG.coordinatorWhatsapp || "5522920050790";
+  const text = encodeURIComponent(SITE_CONFIG.waitlistWhatsappText
+    || "Olá! Quero entrar na lista de espera da Peregrinação Jovem.");
+  link.href = `https://wa.me/${phone}?text=${text}`;
+}
 function setCapacity(count, capacity = tourCapacity) {
   tourCapacity = Number(capacity) || SITE_CONFIG.capacity;
   const registered = Math.min(Number(count) || 0, tourCapacity);
   const remaining = Math.max(tourCapacity - registered, 0);
-  const full = remaining === 0;
-  $("#seats-lead").textContent = full
-    ? "As vagas desta saída acabaram."
+  const waitlistOpen = Boolean(SITE_CONFIG.waitlistOpen) || remaining === 0;
+  $("#seats-lead").textContent = waitlistOpen
+    ? "Vagas encerradas. Entre na lista de espera."
     : "A ficha reserva o seu lugar. O PIX de R$ 30 confirma.";
-  $("#closed-banner").hidden = !full;
+  $("#closed-banner").hidden = !waitlistOpen;
+  setupWaitlistLink();
   // Keep the form hidden after a successful signup (success panel is showing).
   const successShown = !$("#success-panel").hidden;
-  signupForm.hidden = full || successShown;
+  signupForm.hidden = waitlistOpen || successShown;
   const mobileText = $("#mobile-cta-text");
   const mobileLink = $("#mobile-cta-link");
-  if (mobileText) mobileText.innerHTML = full ? "<b>Vagas encerradas</b>" : "<b>05/12</b> · R$ 30";
+  if (mobileText) mobileText.innerHTML = waitlistOpen ? "<b>Lista de espera</b>" : "<b>05/12</b> · R$ 30";
   if (mobileLink) {
-    mobileLink.hidden = full;
-    mobileLink.setAttribute("aria-hidden", full ? "true" : "false");
+    mobileLink.hidden = waitlistOpen;
+    mobileLink.setAttribute("aria-hidden", waitlistOpen ? "true" : "false");
   }
 }
 async function loadCapacity() {
@@ -577,7 +588,7 @@ signupForm.addEventListener("submit", async event => {
     console.error("Falha na inscrição:", error);
     let message = "Não foi possível concluir a inscrição. Tente novamente.";
     if (error.code === "DUPLICATE_REGISTRATION") message = "Já existe inscrição com este documento ou com este nome e data de nascimento.";
-    else if (error.code === "CAPACITY_REACHED") { await loadCapacity(); message = "Vagas encerradas."; }
+    else if (error.code === "CAPACITY_REACHED") { await loadCapacity(); message = "Vagas encerradas. Entre na lista de espera pelo WhatsApp."; }
     else if (error.code === "INVALID_PARTICIPANT") message = "Confira os campos obrigatórios e os dados do responsável.";
     else if (error.message && !error.message.startsWith("HTTP_")) message = error.message;
     $("#form-error").textContent = message;
