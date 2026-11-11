@@ -1,12 +1,14 @@
-import { SITE_CONFIG, API_BASE } from "./config.js?v=11";
+import { SITE_CONFIG, API_BASE } from "./config.js?v=12";
 
 const TOKEN_KEY = "geracao-tour-token";
 const $ = (selector, root = document) => root.querySelector(selector);
 const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const signupForm = $("#signup-form");
 let registrations = [];
+let waitlist = [];
 let visible = [];
 let tourCapacity = SITE_CONFIG.capacity;
+let waitlistMode = Boolean(SITE_CONFIG.waitlistOpen);
 let toastTimer;
 let authToken = localStorage.getItem(TOKEN_KEY) || "";
 
@@ -284,36 +286,33 @@ tickCountdown();
 setInterval(tickCountdown, 30000);
 
 /* ---------- Vagas ---------- */
-function setupWaitlistLink() {
-  const link = $("#waitlist-link");
+function syncWaitlistFormUi() {
   const msg = $("#waitlist-message");
   if (msg && SITE_CONFIG.waitlistMessage) msg.textContent = SITE_CONFIG.waitlistMessage;
-  if (!link) return;
-  const phone = SITE_CONFIG.coordinatorWhatsapp || "5522920050790";
-  const text = encodeURIComponent(SITE_CONFIG.waitlistWhatsappText
-    || "Olá! Quero entrar na lista de espera da Peregrinação Jovem.");
-  link.href = `https://wa.me/${phone}?text=${text}`;
+  const label = $(".submit-label", signupForm);
+  if (label) label.textContent = waitlistMode ? "Entrar na lista de espera" : "Inscrever-se";
+  const mobileText = $("#mobile-cta-text");
+  const mobileLink = $("#mobile-cta-link");
+  if (mobileText) mobileText.innerHTML = waitlistMode ? "<b>Lista de espera</b>" : "<b>05/12</b> · R$ 30";
+  if (mobileLink) {
+    mobileLink.textContent = waitlistMode ? "Entrar na espera" : "Inscrever-se";
+    mobileLink.hidden = false;
+    mobileLink.setAttribute("aria-hidden", "false");
+  }
 }
 function setCapacity(count, capacity = tourCapacity) {
   tourCapacity = Number(capacity) || SITE_CONFIG.capacity;
   const registered = Math.min(Number(count) || 0, tourCapacity);
   const remaining = Math.max(tourCapacity - registered, 0);
-  const waitlistOpen = Boolean(SITE_CONFIG.waitlistOpen) || remaining === 0;
-  $("#seats-lead").textContent = waitlistOpen
-    ? "Vagas encerradas. Entre na lista de espera."
+  waitlistMode = Boolean(SITE_CONFIG.waitlistOpen) || remaining === 0;
+  $("#seats-lead").textContent = waitlistMode
+    ? "Vagas encerradas. Preencha a ficha para entrar na lista de espera."
     : "A ficha reserva o seu lugar. O PIX de R$ 30 confirma.";
-  $("#closed-banner").hidden = !waitlistOpen;
-  setupWaitlistLink();
+  $("#closed-banner").hidden = !waitlistMode;
+  syncWaitlistFormUi();
   // Keep the form hidden after a successful signup (success panel is showing).
   const successShown = !$("#success-panel").hidden;
-  signupForm.hidden = waitlistOpen || successShown;
-  const mobileText = $("#mobile-cta-text");
-  const mobileLink = $("#mobile-cta-link");
-  if (mobileText) mobileText.innerHTML = waitlistOpen ? "<b>Lista de espera</b>" : "<b>05/12</b> · R$ 30";
-  if (mobileLink) {
-    mobileLink.hidden = waitlistOpen;
-    mobileLink.setAttribute("aria-hidden", waitlistOpen ? "true" : "false");
-  }
+  signupForm.hidden = successShown;
 }
 async function loadCapacity() {
   try {
@@ -552,7 +551,44 @@ const pixWhatsapp = SITE_CONFIG.pixWhatsapp || `55${SITE_CONFIG.pixKey}`;
 const receiptText = encodeURIComponent(`Olá, Welerson! Segue o comprovante do PIX de R$ 30 da Peregrinação Jovem.`);
 $("#send-receipt")?.setAttribute("href", `https://wa.me/${pixWhatsapp}?text=${receiptText}`);
 
-/* ---------- Envio da inscrição ---------- */
+/* ---------- Envio da inscrição / lista de espera ---------- */
+function showSignupSuccess({ waitlist = false, minor = false, participant, position } = {}) {
+  signupForm.hidden = true;
+  $("#success-panel").hidden = false;
+  const title = $("#success-title");
+  const body = $("#success-body");
+  const paidActions = $("#success-actions-paid");
+  const waitActions = $("#success-actions-waitlist");
+  const authNote = $("#success-auth-note");
+  if (waitlist) {
+    if (title) title.textContent = "Você entrou na lista de espera.";
+    if (body) {
+      body.innerHTML = position
+        ? `Sua posição na fila é a <b>${position}ª</b>. Se surgir vaga, a coordenação libera sua ficha por ordem e avisa no WhatsApp.`
+        : "Se surgir vaga, a coordenação libera sua ficha por ordem e avisa no WhatsApp.";
+    }
+    if (paidActions) paidActions.hidden = true;
+    if (waitActions) waitActions.hidden = false;
+    if (authNote) authNote.hidden = true;
+    $("#authorization-button").hidden = true;
+  } else {
+    if (title) title.textContent = "Ficha recebida. Falta o PIX.";
+    if (body) {
+      body.innerHTML = "Mande <b>R$ 30</b> no PIX para <b>(22) 99875-0491</b>, Welerson. Depois envie o comprovante no WhatsApp dele: <b>(22) 99875-0491</b>. Aí o lugar é seu.";
+    }
+    if (paidActions) paidActions.hidden = false;
+    if (waitActions) waitActions.hidden = true;
+    if (minor) {
+      $("#authorization-button").hidden = false;
+      $("#authorization-button").onclick = () => downloadAuthorization(participant);
+      if (authNote) authNote.hidden = false;
+    } else {
+      $("#authorization-button").hidden = true;
+      if (authNote) authNote.hidden = true;
+    }
+  }
+  $("#success-panel").scrollIntoView({ behavior: "smooth", block: "center" });
+}
 signupForm.addEventListener("submit", async event => {
   event.preventDefault();
   $("#form-error").textContent = "";
@@ -571,30 +607,44 @@ signupForm.addEventListener("submit", async event => {
   };
   const submit = signupForm.querySelector('[type="submit"]');
   const label = $(".submit-label", submit);
-  submit.disabled = true; label.textContent = "Enviando sua inscrição…";
+  const joiningWaitlist = waitlistMode;
+  submit.disabled = true;
+  label.textContent = joiningWaitlist ? "Entrando na lista de espera…" : "Enviando sua inscrição…";
   try {
-    await api("/register", { method: "POST", body: { participant } });
-    signupForm.hidden = true;
-    $("#success-panel").hidden = false;
-    if (minor) {
-      $("#authorization-button").hidden = false;
-      $("#authorization-button").onclick = () => downloadAuthorization(participant);
-      const authNote = $("#success-auth-note");
-      if (authNote) authNote.hidden = false;
+    if (joiningWaitlist) {
+      const result = await api("/waitlist", { method: "POST", body: { participant } });
+      showSignupSuccess({ waitlist: true, position: result?.position, participant, minor });
+    } else {
+      try {
+        await api("/register", { method: "POST", body: { participant } });
+        showSignupSuccess({ waitlist: false, minor, participant });
+      } catch (error) {
+        if (error.code !== "CAPACITY_REACHED") throw error;
+        const result = await api("/waitlist", { method: "POST", body: { participant } });
+        waitlistMode = true;
+        syncWaitlistFormUi();
+        $("#closed-banner").hidden = false;
+        showSignupSuccess({ waitlist: true, position: result?.position, participant, minor });
+      }
     }
     await loadCapacity();
-    $("#success-panel").scrollIntoView({ behavior: "smooth", block: "center" });
   } catch (error) {
     console.error("Falha na inscrição:", error);
-    let message = "Não foi possível concluir a inscrição. Tente novamente.";
-    if (error.code === "DUPLICATE_REGISTRATION") message = "Já existe inscrição com este documento ou com este nome e data de nascimento.";
-    else if (error.code === "CAPACITY_REACHED") { await loadCapacity(); message = "Vagas encerradas. Entre na lista de espera pelo WhatsApp."; }
-    else if (error.code === "INVALID_PARTICIPANT") message = "Confira os campos obrigatórios e os dados do responsável.";
+    let message = joiningWaitlist
+      ? "Não foi possível entrar na lista de espera. Tente novamente."
+      : "Não foi possível concluir a inscrição. Tente novamente.";
+    if (error.code === "DUPLICATE_REGISTRATION") {
+      message = joiningWaitlist
+        ? "Você já está na lista de espera ou já tem inscrição com este documento/nome."
+        : "Já existe inscrição com este documento ou com este nome e data de nascimento.";
+    } else if (error.code === "INVALID_PARTICIPANT") message = "Confira os campos obrigatórios e os dados do responsável.";
     else if (error.message && !error.message.startsWith("HTTP_")) message = error.message;
     $("#form-error").textContent = message;
-    submit.disabled = false; label.textContent = "Inscrever-se";
+    submit.disabled = false;
+    label.textContent = joiningWaitlist ? "Entrar na lista de espera" : "Inscrever-se";
   }
 });
+$("#share-after-waitlist")?.addEventListener("click", () => $("#share-after")?.click());
 
 /* ---------- Modais ---------- */
 $("#privacy-open").addEventListener("click", () => $("#privacy-dialog").showModal());
@@ -632,10 +682,34 @@ $("#login-form").addEventListener("submit", async event => {
     button.disabled = false;
   }
 });
+function whatsappNumber(person) {
+  const phone = digits(person?.phone || "");
+  return phone.length >= 10 && !phone.startsWith("55") ? `55${phone}` : phone;
+}
+function whatsappContactLink(person) {
+  return `https://wa.me/${whatsappNumber(person)}`;
+}
+function whatsappPromoteLink(person) {
+  const text = encodeURIComponent(SITE_CONFIG.waitlistPromoteWhatsappText
+    || "Oi! Liberamos uma vaga na Peregrinação Jovem. Sua ficha já virou inscrição — mande o PIX de R$ 30 para confirmar.");
+  return `https://wa.me/${whatsappNumber(person)}?text=${text}`;
+}
+function notifyPromoted(person) {
+  if (!person?.phone) return;
+  showToast(`${person.full_name} saiu da espera e entrou nas inscritos. Avisar no WhatsApp?`);
+  window.open(whatsappPromoteLink(person), "_blank", "noopener");
+}
+async function loadWaitlist() {
+  const data = await api("/waitlist", { auth: true });
+  waitlist = data?.data || [];
+}
 async function loadRegistrations() {
   $("#registrations-body").innerHTML = '<tr><td colspan="8" class="empty-table">Carregando fichas…</td></tr>';
-  const data = await api("/registrations", { auth: true });
-  registrations = data?.data || [];
+  const [regData] = await Promise.all([
+    api("/registrations", { auth: true }),
+    loadWaitlist().catch(error => { console.error(error); waitlist = []; })
+  ]);
+  registrations = regData?.data || [];
   renderDashboard();
 }
 async function openDashboard() {
@@ -653,9 +727,31 @@ async function openDashboard() {
 }
 async function signOut() {
   clearSession();
-  registrations = []; visible = [];
+  registrations = []; waitlist = []; visible = [];
   $("#dashboard-dialog").close();
   showToast("Sessão encerrada.");
+}
+function renderWaitlistPanel() {
+  const panel = $("#waitlist-panel");
+  const body = $("#waitlist-body");
+  if (!panel || !body) return;
+  const show = waitlist.length > 0 || Boolean(SITE_CONFIG.waitlistOpen);
+  panel.hidden = !show;
+  $("#stat-waitlist").textContent = waitlist.length;
+  body.innerHTML = waitlist.length ? waitlist.map((p, index) => {
+    const when = p.created_at ? new Date(p.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
+    return `<tr>
+      <td data-label="#">${index + 1}</td>
+      <td data-label="Participante"><b>${escapeHtml(p.full_name)}</b><small>${ageLabel(p.birth_date)} · ${escapeHtml(formatBirth(p.birth_date))}</small></td>
+      <td data-label="Contato"><span class="dash-cell-stack">${escapeHtml(p.phone)}<small>${escapeHtml(p.email)}</small></span></td>
+      <td data-label="Entrou">${escapeHtml(when)}</td>
+      <td data-label="Ações" class="waitlist-actions">
+        <button class="btn btn-gold sm" type="button" data-waitlist-action="promote" data-id="${p.id}">Virar inscrição</button>
+        <a class="btn btn-ghost sm" href="${whatsappContactLink(p)}" target="_blank" rel="noreferrer">WhatsApp</a>
+        <button class="table-icon danger-icon" type="button" title="Remover da espera" aria-label="Remover ${escapeHtml(p.full_name)} da espera" data-waitlist-action="remove" data-id="${p.id}">×</button>
+      </td>
+    </tr>`;
+  }).join("") : `<tr class="dash-empty-row"><td colspan="5" class="empty-table">Ninguém na lista de espera ainda.</td></tr>`;
 }
 function renderDashboard() {
   const paidCount = registrations.filter(isPaid).length;
@@ -664,11 +760,11 @@ function renderDashboard() {
   $("#stat-total").textContent = registrations.length;
   $("#stat-paid").textContent = paidCount;
   $("#stat-unpaid").textContent = registrations.length - paidCount;
-  $("#stat-remaining").textContent = waitlistOpen ? "Aberta" : remaining;
+  $("#stat-remaining").textContent = remaining;
   const remainingLabel = $("#stat-remaining-label");
   const remainingCard = $("#stat-remaining-card");
-  if (remainingLabel) remainingLabel.textContent = waitlistOpen ? "Lista de espera" : "Vagas livres";
-  if (remainingCard) remainingCard.classList.toggle("stat-waitlist", waitlistOpen);
+  if (remainingLabel) remainingLabel.textContent = "Vagas livres";
+  if (remainingCard) remainingCard.classList.toggle("stat-waitlist", waitlistOpen && remaining === 0);
   const dashWaitlist = $("#dash-waitlist");
   if (dashWaitlist) dashWaitlist.hidden = !waitlistOpen;
   const dashSub = $("#dash-sub");
@@ -677,6 +773,7 @@ function renderDashboard() {
       ? "Site em lista de espera · vaga confirmada somente com PIX pago."
       : "Vaga confirmada somente com PIX pago.";
   }
+  renderWaitlistPanel();
   const query = normalize($("#search-input").value.trim());
   const filter = $("#filter-select").value;
   visible = registrations.filter(p => {
@@ -692,7 +789,7 @@ function renderDashboard() {
   visible.sort((a, b) => sort === "newest" ? new Date(b.created_at) - new Date(a.created_at) :
     sort === "oldest" ? new Date(a.created_at) - new Date(b.created_at) :
     sort === "birth" ? a.birth_date.localeCompare(b.birth_date) : a.full_name.localeCompare(b.full_name, "pt-BR"));
-  const waitlistNote = waitlistOpen ? " · lista de espera aberta no site" : "";
+  const waitlistNote = waitlist.length ? ` · ${waitlist.length} na espera` : (waitlistOpen ? " · lista de espera aberta" : "");
   $("#dash-count").textContent = visible.length === registrations.length
     ? `${registrations.length} ficha(s) · ${paidCount} confirmada(s) com PIX${waitlistNote}.`
     : `Exibindo ${visible.length} de ${registrations.length} ficha(s)${waitlistNote}.`;
@@ -778,13 +875,63 @@ $("#registrations-body").addEventListener("click", async event => {
   } else if (action === "reissue") downloadAuthorization(person);
   else if (action === "edit") openEdit(person);
   else if (action === "remove") {
-    if (!confirm(`Remover a inscrição de ${person.full_name}? Esta ação não pode ser desfeita.`)) return;
+    if (!confirm(`Remover a inscrição de ${person.full_name}? Se houver lista de espera, o 1º da fila vira inscrição automaticamente.`)) return;
     try {
-      await api(`/registrations/${person.id}`, { method: "DELETE", auth: true });
+      const result = await api(`/registrations/${person.id}`, { method: "DELETE", auth: true });
       registrations = registrations.filter(p => p.id !== person.id);
-      renderDashboard(); showToast("Inscrição removida.");
-      await loadCapacity();
+      if (result?.promoted) {
+        await loadRegistrations();
+        await loadCapacity();
+        notifyPromoted(result.promoted);
+      } else {
+        renderDashboard();
+        showToast("Inscrição removida.");
+        await loadCapacity();
+      }
     } catch (error) { console.error(error); showToast("Não foi possível remover a inscrição.", true); }
+  }
+});
+async function promoteWaitlistEntry(id) {
+  const result = await api(`/waitlist/${id}/promote`, { method: "POST", auth: true });
+  await loadRegistrations();
+  await loadCapacity();
+  if (result?.promoted) notifyPromoted(result.promoted);
+  else showToast("Participante promovido para inscritos.");
+}
+$("#waitlist-body")?.addEventListener("click", async event => {
+  const control = event.target.closest("[data-waitlist-action]");
+  if (!control) return;
+  const person = waitlist.find(p => p.id === control.dataset.id);
+  if (!person) return;
+  const action = control.dataset.waitlistAction;
+  if (action === "promote") {
+    if (!confirm(`Passar ${person.full_name} da espera para inscritos?`)) return;
+    try { await promoteWaitlistEntry(person.id); }
+    catch (error) {
+      console.error(error);
+      showToast(error.code === "CAPACITY_REACHED" ? "Não há vaga livre para promover." : "Não foi possível promover.", true);
+    }
+  } else if (action === "remove") {
+    if (!confirm(`Remover ${person.full_name} da lista de espera?`)) return;
+    try {
+      await api(`/waitlist/${person.id}`, { method: "DELETE", auth: true });
+      waitlist = waitlist.filter(p => p.id !== person.id);
+      renderDashboard();
+      showToast("Removido da lista de espera.");
+    } catch (error) {
+      console.error(error);
+      showToast("Não foi possível remover da espera.", true);
+    }
+  }
+});
+$("#promote-next-waitlist")?.addEventListener("click", async () => {
+  if (!waitlist.length) { showToast("Lista de espera vazia.", true); return; }
+  const first = waitlist[0];
+  if (!confirm(`Promover o 1º da fila (${first.full_name})?`)) return;
+  try { await promoteWaitlistEntry(first.id); }
+  catch (error) {
+    console.error(error);
+    showToast(error.code === "CAPACITY_REACHED" ? "Não há vaga livre para promover." : "Não foi possível promover.", true);
   }
 });
 $("#registrations-body").addEventListener("change", async event => {

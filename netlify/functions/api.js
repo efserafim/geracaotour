@@ -61,6 +61,23 @@ export async function handler(event) {
     if (method === "POST" && parts[0] === "login" && parts.length === 1) {
       return await login(event);
     }
+    if (parts[0] === "waitlist" && parts.length === 1) {
+      if (method === "GET") return await listWaitlist(event);
+      if (method === "POST") return await joinWaitlist(event);
+      return json(405, { error: "METHOD_NOT_ALLOWED" });
+    }
+    if (parts[0] === "waitlist" && parts.length === 2 && parts[1] === "promote-next") {
+      if (method === "POST") return await promoteNextWaitlist(event);
+      return json(405, { error: "METHOD_NOT_ALLOWED" });
+    }
+    if (parts[0] === "waitlist" && parts.length === 3 && parts[2] === "promote") {
+      if (method === "POST") return await promoteWaitlist(event, parts[1]);
+      return json(405, { error: "METHOD_NOT_ALLOWED" });
+    }
+    if (parts[0] === "waitlist" && parts.length === 2) {
+      if (method === "DELETE") return await deleteWaitlist(event, parts[1]);
+      return json(405, { error: "METHOD_NOT_ALLOWED" });
+    }
     if (parts[0] === "registrations" && parts.length === 1) {
       if (method === "GET") return await listRegistrations(event);
       return json(405, { error: "METHOD_NOT_ALLOWED" });
@@ -233,7 +250,106 @@ async function deleteRegistration(event, id) {
   requireAuth(event);
   if (!/^[0-9a-f-]{36}$/i.test(id)) return json(400, { error: "INVALID_ID" });
   const sql = getSql();
+  await ensureSchema(sql);
   const rows = await sql`delete from public.registrations where id = ${id}::uuid returning id`;
+  if (!rows.length) return json(404, { error: "NOT_FOUND" });
+
+  // Vaga liberada: promove automaticamente o primeiro da lista de espera.
+  let promoted = null;
+  try {
+    const resultRows = await sql`select public.promote_next_waitlist() as data`;
+    const data = resultRows[0]?.data;
+    const parsed = typeof data === "string" ? JSON.parse(data) : data;
+    if (parsed?.promoted) promoted = parsed.promoted;
+  } catch (error) {
+    const code = sqlErrorCode(error);
+    if (code !== "CAPACITY_REACHED" && code !== "NOT_FOUND") {
+      console.error("auto-promote after delete failed:", error);
+    }
+  }
+  return ok({ ok: true, promoted });
+}
+
+async function joinWaitlist(event) {
+  const body = parseBody(event);
+  const participant = body.participant || body;
+  const sql = getSql();
+  try {
+    await ensureSchema(sql);
+    const rows = await sql`
+      select public.join_waitlist(cast(${JSON.stringify(participant)} as jsonb)) as data
+    `;
+    const data = rows[0]?.data;
+    return ok(typeof data === "string" ? JSON.parse(data) : (data || { ok: true }));
+  } catch (error) {
+    console.error("join_waitlist failed:", error);
+    const code = sqlErrorCode(error);
+    const status = code === "DUPLICATE_REGISTRATION" ? 409
+      : code === "INVALID_PARTICIPANT" ? 400
+      : 500;
+    return json(status, {
+      error: code,
+      message: code === "SERVER_ERROR" ? String(error?.message || error) : undefined
+    });
+  }
+}
+
+async function listWaitlist(event) {
+  requireAuth(event);
+  const sql = getSql();
+  await ensureSchema(sql);
+  const rows = await sql`
+    select *
+    from public.waitlist
+    order by created_at asc
+  `;
+  return ok({ data: rows.map(serializeRegistration) });
+}
+
+async function promoteWaitlist(event, id) {
+  requireAuth(event);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return json(400, { error: "INVALID_ID" });
+  const sql = getSql();
+  try {
+    await ensureSchema(sql);
+    const rows = await sql`select public.promote_waitlist(${id}::uuid) as data`;
+    const data = rows[0]?.data;
+    return ok(typeof data === "string" ? JSON.parse(data) : data);
+  } catch (error) {
+    console.error("promote_waitlist failed:", error);
+    const code = sqlErrorCode(error);
+    const status = code === "CAPACITY_REACHED" || code === "DUPLICATE_REGISTRATION" ? 409
+      : code === "NOT_FOUND" ? 404
+      : code === "INVALID_PARTICIPANT" ? 400
+      : 500;
+    return json(status, { error: code });
+  }
+}
+
+async function promoteNextWaitlist(event) {
+  requireAuth(event);
+  const sql = getSql();
+  try {
+    await ensureSchema(sql);
+    const rows = await sql`select public.promote_next_waitlist() as data`;
+    const data = rows[0]?.data;
+    return ok(typeof data === "string" ? JSON.parse(data) : data);
+  } catch (error) {
+    console.error("promote_next_waitlist failed:", error);
+    const code = sqlErrorCode(error);
+    const status = code === "CAPACITY_REACHED" || code === "DUPLICATE_REGISTRATION" ? 409
+      : code === "NOT_FOUND" ? 404
+      : 500;
+    return json(status, { error: code });
+  }
+}
+
+async function deleteWaitlist(event, id) {
+  requireAuth(event);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return json(400, { error: "INVALID_ID" });
+  const sql = getSql();
+  await ensureSchema(sql);
+  const rows = await sql`delete from public.waitlist where id = ${id}::uuid returning id`;
   if (!rows.length) return json(404, { error: "NOT_FOUND" });
   return ok({ ok: true });
 }

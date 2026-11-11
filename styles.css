@@ -215,9 +215,17 @@ input[type=date]{color-scheme:light}
 .dash-waitlist{display:grid;gap:4px;padding:14px 16px;margin-bottom:16px;border-radius:14px;background:#fde8ea;border:1px solid #f3b4ba;color:#8a1f2c}
 .dash-waitlist b{font-size:14px;color:#7a1824}
 .dash-waitlist span{font-size:13px;line-height:1.45}
-.stat-waitlist{border-color:#f3b4ba;background:#fde8ea}
-.stat-waitlist b,.stat-waitlist span{color:#7a1824}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-waitlist,.stat-waitlist-count{border-color:#f3b4ba;background:#fde8ea}
+.stat-waitlist b,.stat-waitlist span,.stat-waitlist-count b,.stat-waitlist-count span{color:#7a1824}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:18px}
+.waitlist-panel{margin-bottom:18px;padding:16px;border-radius:16px;background:#fff;border:1px solid #f3b4ba}
+.waitlist-panel-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.waitlist-panel-head h3{margin:0;font-size:16px;color:#7a1824}
+.waitlist-table-wrap{margin:0}
+.waitlist-panel table{width:100%;border-collapse:collapse;font-size:12px}
+.waitlist-panel th{padding:10px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:#fff;background:#8a1f2c;text-align:left}
+.waitlist-panel td{padding:10px;border-top:1px solid #f3d0d4;vertical-align:top}
+.waitlist-panel .waitlist-actions{display:flex;flex-wrap:wrap;gap:6px}
 .stats article{padding:16px 18px;border-radius:16px;background:#fff;border:1px solid #d5e0f2}
 .stats span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
 .stats b{font-size:28px;color:var(--ink)}
@@ -349,6 +357,11 @@ body.scrolled .to-top{opacity:1;visibility:visible;transform:none}
   .section{padding:56px 6%}
   .facts{grid-template-columns:1fr 1fr}
   .stats{grid-template-columns:repeat(2,1fr)}
+  .waitlist-panel{padding:12px}
+  .waitlist-panel thead{display:none}
+  .waitlist-panel tbody{display:grid;gap:8px}
+  .waitlist-panel tr{display:grid;gap:6px;padding:12px;border:1px solid #f3d0d4;border-radius:12px;background:#fff8f8}
+  .waitlist-panel td{border:0;padding:0}
   .dashboard-modal{
     width:100%;
     max-width:100%;

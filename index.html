@@ -76,7 +76,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap"></noscript>
   <link rel="preload" as="image" href="./image/guido-schaffer-696x392.jpeg" fetchpriority="high">
-  <link rel="stylesheet" href="./styles.css?v=18">
+  <link rel="stylesheet" href="./styles.css?v=19">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -374,11 +374,7 @@
         <p class="form-hint">* obrigatório</p>
         <div id="closed-banner" class="closed-banner" hidden>
           <b>Vagas encerradas — lista de espera</b>
-          <span id="waitlist-message">As vagas desta saída acabaram. Você pode entrar na lista de espera: se alguém desistir, a coordenação chama por ordem.</span>
-          <a class="btn btn-gold waitlist-cta" id="waitlist-link" href="https://wa.me/5522920050790" target="_blank" rel="noreferrer">
-            <svg aria-hidden="true"><use href="#i-whatsapp"/></svg>
-            Entrar na lista de espera
-          </a>
+          <span id="waitlist-message">As vagas desta saída acabaram. Preencha a ficha abaixo para entrar na lista de espera: se alguém desistir, a coordenação libera a vaga por ordem e avisa no WhatsApp.</span>
         </div>
         <form id="signup-form" novalidate>
           <div class="form-grid">
@@ -405,14 +401,17 @@
         </form>
         <div class="success-panel" id="success-panel" hidden role="status">
           <span class="success-check"><svg><use href="#i-cross"/></svg></span>
-          <h3>Ficha recebida. Falta o PIX.</h3>
-          <p>Mande <b>R$ 30</b> no PIX para <b>(22) 99875-0491</b>, Welerson. Depois envie o comprovante no WhatsApp dele: <b>(22) 99875-0491</b>. Aí o lugar é seu.</p>
+          <h3 id="success-title">Ficha recebida. Falta o PIX.</h3>
+          <p id="success-body">Mande <b>R$ 30</b> no PIX para <b>(22) 99875-0491</b>, Welerson. Depois envie o comprovante no WhatsApp dele: <b>(22) 99875-0491</b>. Aí o lugar é seu.</p>
           <p id="success-auth-note" hidden>Se for menor de 18 anos: baixe a autorização, peça a assinatura do responsável e <b>entregue no dia do passeio</b>, na concentração das 6h.</p>
-          <div class="success-actions">
+          <div class="success-actions" id="success-actions-paid">
             <button class="btn btn-gold" type="button" id="copy-pix-success">Copiar chave PIX</button>
             <button class="btn btn-gold" id="authorization-button" type="button" hidden>Baixar autorização <span aria-hidden="true">↓</span></button>
             <a class="btn btn-ghost" id="send-receipt" href="https://wa.me/5522998750491" target="_blank" rel="noreferrer"><svg aria-hidden="true"><use href="#i-whatsapp"/></svg> Enviar comprovante ao Welerson</a>
             <button class="btn btn-ghost" type="button" id="share-after"><svg aria-hidden="true"><use href="#i-share"/></svg> Chamar um amigo</button>
+          </div>
+          <div class="success-actions" id="success-actions-waitlist" hidden>
+            <button class="btn btn-ghost" type="button" id="share-after-waitlist"><svg aria-hidden="true"><use href="#i-share"/></svg> Chamar um amigo</button>
           </div>
         </div>
         <p class="privacy-foot">Só a coordenação vê o que você preencheu.</p>
@@ -530,13 +529,35 @@
     </div>
     <div id="dash-waitlist" class="dash-waitlist" hidden>
       <b>Lista de espera aberta no site</b>
-      <span>A ficha pública está fechada. Quem quiser entrar manda mensagem no WhatsApp da Bia; a coordenação chama se surgir vaga.</span>
+      <span>Quem preenche a ficha entra na fila abaixo. Ao remover um inscrito, o primeiro da fila vira inscrição automaticamente.</span>
     </div>
     <div class="stats">
       <article><span>Fichas</span><b id="stat-total">0</b></article>
       <article class="stat-paid"><span>PIX pagos</span><b id="stat-paid">0</b></article>
       <article class="stat-wait"><span>Aguardando PIX</span><b id="stat-unpaid">0</b></article>
+      <article class="stat-waitlist-count"><span>Na espera</span><b id="stat-waitlist">0</b></article>
       <article id="stat-remaining-card"><span id="stat-remaining-label">Vagas livres</span><b id="stat-remaining">33</b></article>
+    </div>
+    <div id="waitlist-panel" class="waitlist-panel" hidden>
+      <div class="waitlist-panel-head">
+        <h3>Lista de espera</h3>
+        <button class="btn btn-ghost sm" type="button" id="promote-next-waitlist">Promover o 1º</button>
+      </div>
+      <div class="table-wrap waitlist-table-wrap">
+        <table>
+          <caption class="sr-only">Fila da lista de espera</caption>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Participante</th>
+              <th scope="col">Contato</th>
+              <th scope="col">Entrou</th>
+              <th scope="col">Ações</th>
+            </tr>
+          </thead>
+          <tbody id="waitlist-body"></tbody>
+        </table>
+      </div>
     </div>
     <div class="controls">
       <input id="search-input" type="search" aria-label="Buscar inscritos" placeholder="Buscar nome, telefone ou e-mail ( / )">
@@ -608,6 +629,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=29"></script>
+  <script type="module" src="./app.js?v=30"></script>
 </body>
 </html>

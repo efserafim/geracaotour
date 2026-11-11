@@ -25,10 +25,10 @@ export const SITE_CONFIG = {
   // WhatsApp do Welerson para envio do comprovante do PIX (mesmo número da chave).
   pixWhatsapp: "5522998750491",
 
-  // Lista de espera: true = esconde a ficha e encaminha para o WhatsApp.
+  // Lista de espera: true = ficha pública entra na fila (não ocupa vaga até promover).
   waitlistOpen: true,
-  waitlistMessage: "As vagas desta saída acabaram. Você pode entrar na lista de espera: se alguém desistir, a coordenação chama por ordem.",
-  waitlistWhatsappText: "Olá! Quero entrar na lista de espera da Peregrinação Jovem (Geração Tour) de 05/12.",
+  waitlistMessage: "As vagas desta saída acabaram. Preencha a ficha abaixo para entrar na lista de espera: se alguém desistir, a coordenação libera a vaga por ordem e avisa no WhatsApp.",
+  waitlistPromoteWhatsappText: "Oi! Liberamos uma vaga na Peregrinação Jovem (Geração Tour) de 05/12. Sua ficha já virou inscrição — mande R$ 30 no PIX (22) 99875-0491 (Welerson) e envie o comprovante no WhatsApp dele para confirmar.",
 
   info: {
     price: "R$ 30 no PIX (22) 99875-0491, Welerson. Envie o comprovante no WhatsApp dele. A ficha reserva; o pagamento confirma.",
