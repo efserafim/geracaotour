@@ -176,7 +176,7 @@ async function listRegistrations(event) {
   const rows = await sql`
     select *
     from public.registrations
-    order by created_at desc
+    order by created_at asc
   `;
   return ok({ data: rows.map(serializeRegistration) });
 }

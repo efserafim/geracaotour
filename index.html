@@ -76,7 +76,7 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap" media="print" onload="this.media='all'">
   <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ultra&family=Libre+Baskerville:ital,wght@1,400;1,700&family=Sora:wght@400;500;600;700&display=swap"></noscript>
   <link rel="preload" as="image" href="./image/guido-schaffer-696x392.jpeg" fetchpriority="high">
-  <link rel="stylesheet" href="./styles.css?v=19">
+  <link rel="stylesheet" href="./styles.css?v=20">
 </head>
 <body>
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
@@ -571,9 +571,9 @@
         <option value="absent">Sem check-in</option>
       </select>
       <select id="sort-select" aria-label="Ordenar inscritos">
+        <option value="oldest" selected>Ordem de inscrição</option>
         <option value="newest">Mais recentes</option>
         <option value="name">Nome A–Z</option>
-        <option value="oldest">Mais antigos</option>
         <option value="birth">Data de nascimento</option>
       </select>
     </div>
@@ -629,6 +629,6 @@
   </dialog>
 
   <div id="toast" role="status" aria-live="polite"></div>
-  <script type="module" src="./app.js?v=30"></script>
+  <script type="module" src="./app.js?v=31"></script>
 </body>
 </html>

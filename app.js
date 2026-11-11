@@ -738,7 +738,8 @@ function renderWaitlistPanel() {
   const show = waitlist.length > 0 || Boolean(SITE_CONFIG.waitlistOpen);
   panel.hidden = !show;
   $("#stat-waitlist").textContent = waitlist.length;
-  body.innerHTML = waitlist.length ? waitlist.map((p, index) => {
+  const ordered = [...waitlist].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  body.innerHTML = ordered.length ? ordered.map((p, index) => {
     const when = p.created_at ? new Date(p.created_at).toLocaleString("pt-BR", { dateStyle: "short", timeStyle: "short" }) : "—";
     return `<tr>
       <td data-label="#">${index + 1}</td>
@@ -752,6 +753,7 @@ function renderWaitlistPanel() {
       </td>
     </tr>`;
   }).join("") : `<tr class="dash-empty-row"><td colspan="5" class="empty-table">Ninguém na lista de espera ainda.</td></tr>`;
+  waitlist = ordered;
 }
 function renderDashboard() {
   const paidCount = registrations.filter(isPaid).length;
