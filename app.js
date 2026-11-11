@@ -552,7 +552,7 @@ const receiptText = encodeURIComponent(`Olá, Welerson! Segue o comprovante do P
 $("#send-receipt")?.setAttribute("href", `https://wa.me/${pixWhatsapp}?text=${receiptText}`);
 
 /* ---------- Envio da inscrição / lista de espera ---------- */
-function showSignupSuccess({ waitlist = false, minor = false, participant, position } = {}) {
+function showSignupSuccess({ waitlist = false, minor = false, participant } = {}) {
   signupForm.hidden = true;
   $("#success-panel").hidden = false;
   const title = $("#success-title");
@@ -563,9 +563,7 @@ function showSignupSuccess({ waitlist = false, minor = false, participant, posit
   if (waitlist) {
     if (title) title.textContent = "Você entrou na lista de espera.";
     if (body) {
-      body.innerHTML = position
-        ? `Sua posição na fila é a <b>${position}ª</b>. Se surgir vaga, a coordenação libera sua ficha por ordem e avisa no WhatsApp.`
-        : "Se surgir vaga, a coordenação libera sua ficha por ordem e avisa no WhatsApp.";
+      body.innerHTML = "Se surgir vaga, a coordenação libera sua ficha por ordem e avisa no WhatsApp.";
     }
     if (paidActions) paidActions.hidden = true;
     if (waitActions) waitActions.hidden = false;
@@ -613,18 +611,18 @@ signupForm.addEventListener("submit", async event => {
   try {
     if (joiningWaitlist) {
       const result = await api("/waitlist", { method: "POST", body: { participant } });
-      showSignupSuccess({ waitlist: true, position: result?.position, participant, minor });
+      showSignupSuccess({ waitlist: true, participant, minor });
     } else {
       try {
         await api("/register", { method: "POST", body: { participant } });
         showSignupSuccess({ waitlist: false, minor, participant });
       } catch (error) {
         if (error.code !== "CAPACITY_REACHED") throw error;
-        const result = await api("/waitlist", { method: "POST", body: { participant } });
+        await api("/waitlist", { method: "POST", body: { participant } });
         waitlistMode = true;
         syncWaitlistFormUi();
         $("#closed-banner").hidden = false;
-        showSignupSuccess({ waitlist: true, position: result?.position, participant, minor });
+        showSignupSuccess({ waitlist: true, participant, minor });
       }
     }
     await loadCapacity();
