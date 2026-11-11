@@ -27,7 +27,7 @@ export const SITE_CONFIG = {
 
   // Lista de espera: true = ficha pública entra na fila (ilimitada; não ocupa as 33 vagas até promover).
   waitlistOpen: true,
-  waitlistMessage: "As 33 vagas do ônibus acabaram, mas a lista de espera é ilimitada. Preencha a ficha abaixo: se alguém desistir, a coordenação libera por ordem de inscrição e avisa no WhatsApp.",
+  waitlistMessage: "Preencha a ficha abaixo para entrar na lista de espera. Se surgir vaga, a coordenação libera por ordem de inscrição e avisa no WhatsApp.",
   waitlistPromoteWhatsappText: "Oi! Liberamos uma vaga na Peregrinação Jovem (Geração Tour) de 05/12. Sua ficha já virou inscrição — mande R$ 30 no PIX (22) 99875-0491 (Welerson) e envie o comprovante no WhatsApp dele para confirmar.",
 
   info: {
